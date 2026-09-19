@@ -45,6 +45,10 @@ export const metadata: Metadata = {
   title: { default: siteTitle, template: "%s — Artifacts" },
   description: siteDescription,
   alternates: { canonical: "/" },
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
