@@ -1,0 +1,75 @@
+.archive {
+  display: grid;
+  grid-template-columns: clamp(16.25rem, 25vw, 21.25rem) minmax(0, 1fr);
+  width: 100%;
+  height: 100svh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.collection {
+  min-width: 0;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  scrollbar-color: var(--color-text-muted) transparent;
+  scrollbar-width: thin;
+  outline-offset: -3px;
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  height: 100%;
+  gap: clamp(3rem, 5vw, 5.5rem);
+  padding: clamp(2rem, 4svh, 3.5rem) clamp(2rem, 4vw, 5rem);
+}
+
+.track > article:nth-child(1) { margin-top: clamp(4.5rem, 17svh, 9rem); }
+.track > article:nth-child(2) { margin-top: 0; }
+.track > article:nth-child(3) { margin-top: clamp(5rem, 19svh, 10rem); }
+.track > article:nth-child(4) { margin-top: clamp(2.5rem, 8svh, 4.5rem); }
+.track > article:nth-child(5) { margin-top: clamp(4rem, 14svh, 7.5rem); }
+.track > article:nth-child(6) { margin-top: clamp(1rem, 3svh, 2rem); }
+
+.collection::-webkit-scrollbar {
+  height: 0.45rem;
+}
+
+.collection::-webkit-scrollbar-thumb {
+  background: var(--color-text-muted);
+}
+
+.collection::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (max-width: 900px) {
+  .archive {
+    display: block;
+    height: auto;
+    min-height: 100svh;
+    overflow: visible;
+  }
+
+  .collection {
+    height: auto;
+    overflow-y: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .track {
+    height: auto;
+    align-items: flex-start;
+    gap: clamp(1.25rem, 5vw, 2.5rem);
+    padding: clamp(1.5rem, 5vw, 3rem);
+    padding-right: max(clamp(1.5rem, 5vw, 3rem), env(safe-area-inset-right));
+    padding-left: max(clamp(1.5rem, 5vw, 3rem), env(safe-area-inset-left));
+  }
+
+  .track > article:nth-child(n) { margin-top: 0; }
+}

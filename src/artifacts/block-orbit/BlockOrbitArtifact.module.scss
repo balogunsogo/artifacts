@@ -1,0 +1,109 @@
+.stage {
+  --cube-size: clamp(13rem, 26vw, 25rem);
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  overflow: clip;
+  perspective: 1100px;
+  perspective-origin: 50% 36%;
+  isolation: isolate;
+}
+
+.full {
+  min-height: inherit;
+  background: var(--card-preview-bg, #e3e0d8);
+  touch-action: pan-y;
+}
+
+.preview {
+  --cube-size: clamp(8.25rem, 13vw, 11.5rem);
+  background: var(--card-preview-bg, #d8d2c7);
+  perspective: 760px;
+  perspective-origin: 50% 42%;
+  touch-action: pan-x;
+}
+
+.tilt {
+  position: relative;
+  width: var(--cube-size);
+  height: var(--cube-size);
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.cube {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotateX(-12deg) rotateY(0deg);
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  animation: spin 16s linear infinite;
+  will-change: transform;
+}
+
+.cube[data-paused="true"] {
+  animation-play-state: paused;
+  will-change: auto;
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  background: #2a2927;
+  border: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.006);
+  }
+}
+
+.front { transform: translateZ(calc(var(--cube-size) / 2)); }
+.back { transform: rotateY(180deg) translateZ(calc(var(--cube-size) / 2)); }
+.right { transform: rotateY(90deg) translateZ(calc(var(--cube-size) / 2)); }
+.left { transform: rotateY(-90deg) translateZ(calc(var(--cube-size) / 2)); }
+.top { transform: rotateX(90deg) translateZ(calc(var(--cube-size) / 2)); }
+.bottom { transform: rotateX(-90deg) translateZ(calc(var(--cube-size) / 2)); }
+
+@keyframes spin {
+  from { transform: rotateX(-12deg) rotateY(0deg); }
+  to { transform: rotateX(-12deg) rotateY(360deg); }
+}
+
+@media (max-width: 700px) {
+  .stage {
+    --cube-size: clamp(9.5rem, 48vw, 12rem);
+    perspective: 800px;
+    perspective-origin: 50% 50%;
+  }
+
+  .preview {
+    --cube-size: clamp(8.75rem, 42vw, 11rem);
+    perspective: 700px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tilt {
+    transform: none !important;
+    will-change: auto;
+  }
+
+  .cube {
+    animation: none;
+    transform: rotateX(-12deg) rotateY(35deg);
+    will-change: auto;
+  }
+}

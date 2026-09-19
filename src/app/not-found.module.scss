@@ -1,0 +1,6 @@
+@use "../styles/mixins" as *;
+
+.page { display: flex; flex-direction: column; justify-content: space-between; min-height: 100svh; padding: var(--space-4); }
+.page p { @include label; color: var(--color-accent); }
+.page h1 { max-width: 11ch; font-size: var(--text-xl); font-weight: 600; letter-spacing: -0.045em; line-height: 0.95; }
+.page a { @include label; width: max-content; border-bottom: 1px solid currentColor; }

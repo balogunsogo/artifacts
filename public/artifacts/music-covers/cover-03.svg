@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Abstract violet and yellow composition">
+  <rect width="800" height="800" fill="#5c226f"/>
+  <path d="M0 0h800L400 400Z" fill="#f3c83f"/>
+  <path d="M0 800V230l285 285L0 800Z" fill="#ef6b8d"/>
+  <path d="M800 800V230L515 515l285 285Z" fill="#272035"/>
+  <rect x="286" y="402" width="228" height="228" transform="rotate(45 400 516)" fill="#eee9dc"/>
+</svg>

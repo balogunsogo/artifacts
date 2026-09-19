@@ -1,0 +1,35 @@
+@use "../../styles/mixins" as *;
+
+.stage {
+  position: relative;
+  min-height: calc(100svh - 5.5rem);
+  overflow: hidden;
+  background: var(--stage-bg);
+  color: var(--stage-fg);
+  isolation: isolate;
+}
+
+.visual {
+  position: absolute;
+  inset: 0;
+  --color-text-secondary: #4f4d47;
+  --color-text-muted: #817d74;
+}
+.visual > div { background: var(--stage-bg); }
+.pending { @include label; position: absolute; left: var(--space-4); bottom: var(--space-4); }
+.info { position: absolute; z-index: 10; right: var(--space-4); bottom: var(--space-4); }
+
+.scrollStage {
+  min-height: 0;
+  overflow: visible;
+
+  .visual { position: relative; inset: auto; }
+  .pending, .info { z-index: 2; }
+}
+
+@media (max-width: 600px) {
+  .stage { min-height: 0; }
+  .scrollStage { min-height: 0; }
+  .pending { bottom: 5.2rem; }
+  .info { left: var(--space-4); right: auto; }
+}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Abstract green and black composition">
+  <rect width="800" height="800" fill="#0d2b24"/>
+  <rect x="76" y="72" width="238" height="656" fill="#b9f04a"/>
+  <rect x="368" y="72" width="356" height="294" fill="#f0eee5"/>
+  <circle cx="546" cy="558" r="178" fill="#f15b3d"/>
+  <path d="m368 366 356 0-178 356Z" fill="#11120f"/>
+</svg>
