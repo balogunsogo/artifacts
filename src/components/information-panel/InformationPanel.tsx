@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import type { Artifact } from "@/artifacts/artifact.types";
 import { event } from "@/lib/analytics";
 import styles from "./InformationPanel.module.scss";
@@ -70,8 +71,13 @@ export function InformationPanel({ artifact }: { artifact: Artifact }) {
       >
         Information <span aria-hidden="true">+</span>
       </button>
-      {open && (
-        <div className={styles.overlay} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
+      {open && typeof document !== "undefined" && createPortal(
+        <div
+          className={styles.overlay}
+          role="presentation"
+          style={{ "--color-accent": artifact.theme.accent } as CSSProperties}
+          onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}
+        >
           <div ref={panelRef} id={panelId} className={styles.panel} role="dialog" aria-modal="true" aria-labelledby={`${panelId}-title`}>
             <div className={styles.panelHeader}>
               <span>Artifact information</span>
@@ -93,7 +99,8 @@ export function InformationPanel({ artifact }: { artifact: Artifact }) {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
