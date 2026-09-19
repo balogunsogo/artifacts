@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
 import { Inter_Tight, Syne } from "next/font/google";
+import {
+  siteDescription,
+  siteTitle,
+  siteUrl,
+  socialDescription,
+  socialImage,
+  socialImageAlt,
+} from "./site-metadata";
 import "./globals.scss";
 
 const themeInitializationScript = `
@@ -33,15 +41,24 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://artifacts.oluwasogo.dev"),
-  title: { default: "Artifacts — Interaction Archive", template: "%s — Artifacts" },
-  description:
-    "A growing archive of reusable interactions, motion studies and digital experiments by Oluwasogo Balogun.",
+  metadataBase: new URL(siteUrl),
+  title: { default: siteTitle, template: "%s — Artifacts" },
+  description: siteDescription,
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
+    locale: "en_US",
+    url: siteUrl,
     siteName: "Artifacts",
-    title: "Artifacts — Interaction Archive by Oluwasogo Balogun",
-    description: "Reusable interactions, motion studies and digital experiments.",
+    title: siteTitle,
+    description: socialDescription,
+    images: [socialImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteTitle,
+    description: socialDescription,
+    images: [{ url: socialImage.url, alt: socialImageAlt }],
   },
 };
 

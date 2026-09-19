@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { artifacts } from "@/artifacts/artifact.data";
 import { getArtifactBySlug } from "@/artifacts/artifact.utils";
 import { ArtifactStage } from "@/components/artifact-stage/ArtifactStage";
+import { socialImage, socialImageAlt } from "@/app/site-metadata";
 import styles from "./page.module.scss";
 
 type ArtifactPageProps = { params: Promise<{ slug: string }> };
@@ -13,13 +14,25 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: ArtifactPageProps): Promise<Metadata> {
-  const artifact = getArtifactBySlug((await params).slug);
+  const { slug } = await params;
+  const artifact = getArtifactBySlug(slug);
   if (!artifact) return { title: "Artifact not found" };
   return {
     title: `${artifact.id} — ${artifact.title}`,
     description: artifact.description,
-    openGraph: { title: `${artifact.id} — ${artifact.title}`, description: artifact.description, images: [] },
-    twitter: { card: "summary", title: `${artifact.id} — ${artifact.title}`, description: artifact.description, images: [] },
+    alternates: { canonical: `/artifacts/${slug}` },
+    openGraph: {
+      title: `${artifact.id} — ${artifact.title}`,
+      description: artifact.description,
+      url: `/artifacts/${slug}`,
+      images: [socialImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${artifact.id} — ${artifact.title}`,
+      description: artifact.description,
+      images: [{ url: socialImage.url, alt: socialImageAlt }],
+    },
   };
 }
 
