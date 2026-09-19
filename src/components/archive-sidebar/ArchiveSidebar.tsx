@@ -13,7 +13,7 @@ export function ArchiveSidebar() {
       </div>
       <div className={styles.intro}>
         <h1 className="sr-only">Artifacts interaction archive</h1>
-        <p>Artifacts is a growing collection of reusable interactions, motion studies and interface behaviours.</p>
+        <p>Artifacts is a growing collection of reusable interactions, motion studies and interface behaviours from my projects.</p>
         <p>Some began inside larger projects. Others started as prototypes, unfinished ideas or small technical questions. Each one is isolated, documented and rebuilt so it can be studied, reused and developed further.</p>
       </div>
       <div className={styles.footer}>
