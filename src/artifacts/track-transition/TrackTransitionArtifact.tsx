@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ARCHIVE_TRACKS, TRACK_TRANSITION_TRACKS } from "@/artifacts/_shared/music/tracks";
 import {
   DEFAULT_PALETTE,
@@ -17,6 +17,7 @@ export type TrackTransitionArtifactProps = {
   className?: string;
   initialTrackIndex?: number;
   autoCycle?: boolean;
+  footer?: ReactNode;
 };
 
 type TransitionPhase = "idle" | "preparing" | "departing" | "committing" | "arriving";
@@ -47,6 +48,7 @@ export function TrackTransitionArtifact({
   className,
   initialTrackIndex = 0,
   autoCycle,
+  footer,
 }: TrackTransitionArtifactProps) {
   const demoTracks = mode === "full" ? ARCHIVE_TRACKS : TRACK_TRANSITION_TRACKS;
   const startingIndex = wrapIndex(Math.round(initialTrackIndex), demoTracks.length);
@@ -354,6 +356,7 @@ export function TrackTransitionArtifact({
           )}
         </div>
       </div>
+      {footer && <div className={styles.footer}>{footer}</div>}
     </div>
   );
 }

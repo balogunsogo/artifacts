@@ -39,10 +39,12 @@ export function ArtifactStage({ artifact }: { artifact: Artifact }) {
         ) : artifact.slug === "palette-shift" ? (
           <PaletteShiftArtifact mode="full" />
         ) : (
-          <TrackTransitionArtifact mode="full" />
+          <TrackTransitionArtifact mode="full" footer={<InformationPanel artifact={artifact} />} />
         )}
       </div>
-      <div className={styles.info}><InformationPanel artifact={artifact} /></div>
+      {artifact.slug !== "track-transition" && (
+        <div className={styles.info}><InformationPanel artifact={artifact} /></div>
+      )}
     </section>
   );
 }
