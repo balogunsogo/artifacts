@@ -18,6 +18,7 @@ type CinemaState = "closed" | "opening" | "open" | "closing";
 export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaArtifactProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
+  const scaleRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
   const ambientVideoRef = useRef<HTMLVideoElement>(null);
   const instructionRef = useRef<HTMLParagraphElement>(null);
@@ -33,9 +34,10 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
   useGSAP(() => {
     const root = rootRef.current;
     const stage = stageRef.current;
+    const scaleWrapper = scaleRef.current;
     const media = mediaRef.current;
     const ambientVideo = ambientVideoRef.current;
-    if (!root || !stage || !media || !ambientVideo) return;
+    if (!root || !stage || !scaleWrapper || !media || !ambientVideo) return;
 
     const instruction = instructionRef.current;
     const triggerButton = cinemaTriggerRef.current;
@@ -191,13 +193,17 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
     cinemaVideo?.addEventListener("ended", onCinemaEnded);
 
     const targetScale = () => {
-      const bounds = media.getBoundingClientRect();
-      const currentScale = Number(gsap.getProperty(media, "scale")) || 1;
+      const bounds = scaleWrapper.getBoundingClientRect();
+      const currentScale = Number(gsap.getProperty(scaleWrapper, "scale")) || 1;
       const baseWidth = bounds.width / currentScale;
       const baseHeight = bounds.height / currentScale;
-      const availableWidth = stage.getBoundingClientRect().width || window.innerWidth;
-      const availableHeight = nativeTouch ? stableViewportHeight : window.innerHeight;
-      return Math.max(availableWidth / baseWidth, availableHeight / baseHeight) * 1.015;
+      const stageBounds = stage.getBoundingClientRect();
+      const availableWidth = stageBounds.width || window.innerWidth;
+      const availableHeight = nativeTouch ? stableViewportHeight : stageBounds.height || window.innerHeight;
+      const widthScale = availableWidth / baseWidth;
+      const heightScale = availableHeight / baseHeight;
+
+      return Math.max(widthScale, heightScale) * 1.015;
     };
 
     const buildScrollScene = () => {
@@ -205,41 +211,26 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
       scrollTimeline?.kill();
       scrollTrigger = null;
       scrollTimeline = null;
-      gsap.set(media, { clearProps: "transform,borderRadius" });
+      gsap.set(scaleWrapper, { clearProps: "transform" });
+      gsap.set(media, { clearProps: "borderRadius" });
       if (instruction) gsap.set(instruction, { clearProps: "opacity,transform" });
       root.dataset.reduced = String(reducedMotion.matches);
       if (mode !== "full" || reducedMotion.matches) return;
 
       const mobile = window.matchMedia("(max-width: 700px)").matches;
-      if (mobile || nativeTouch) {
-        const restrainedScale = Math.max(1, Math.min(1.06, targetScale()));
-        scrollTimeline = gsap.timeline()
-          .fromTo(media, { scale: 0.96 }, { scale: restrainedScale, duration: 1, ease: "none" });
-        if (instruction) {
-          scrollTimeline.to(instruction, { opacity: 0.35, y: -6, duration: 0.45, ease: "none" }, 0.2);
-        }
-        scrollTrigger = ScrollTrigger.create({
-          trigger: stage,
-          start: "top 82%",
-          end: "bottom 28%",
-          scrub: 0.45,
-          animation: scrollTimeline,
-          invalidateOnRefresh: true,
-        });
-        return;
-      }
       scrollTimeline = gsap.timeline()
         .to({}, { duration: 0.1 })
-        .to(media, { scale: targetScale, borderRadius: 0, duration: 0.65, ease: "none" });
+        .to(scaleWrapper, { scale: targetScale, duration: 0.65, ease: "none" })
+        .to(media, { borderRadius: 0, duration: 0.65, ease: "none" }, "<");
       if (instruction) {
-        scrollTimeline.to(instruction, { opacity: 0, y: -10, duration: 0.28, ease: "none" }, 0.08);
+        scrollTimeline.to(instruction, { opacity: 0, y: mobile ? -6 : -10, duration: 0.28, ease: "none" }, 0.08);
       }
       scrollTimeline.to({}, { duration: 0.25 });
 
       scrollTrigger = ScrollTrigger.create({
         trigger: root,
         start: "top top",
-        end: () => `+=${(nativeTouch ? stableViewportHeight : window.innerHeight) * 1.8}`,
+        end: () => `+=${(nativeTouch ? stableViewportHeight : window.innerHeight) * (mobile ? 1.15 : 1.8)}`,
         pin: stage,
         pinSpacing: true,
         scrub: 0.6,
@@ -314,7 +305,7 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
       if (focusFrame !== null) window.cancelAnimationFrame(focusFrame);
       scrollTrigger?.kill(true);
       scrollTimeline?.kill();
-      gsap.killTweensOf([media, instruction].filter(Boolean));
+      gsap.killTweensOf([scaleWrapper, media, instruction].filter(Boolean));
       ambientVideo.pause();
       cinemaVideo?.pause();
       finishClose(false, false);
@@ -328,34 +319,37 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
   return (
     <div ref={rootRef} className={rootClassName} data-reduced="false">
       <div ref={stageRef} className={styles.stage}>
-        <div ref={mediaRef} className={styles.media}>
-          <video
-            ref={ambientVideoRef}
-            className={styles.video}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload={mode === "preview" ? "metadata" : "auto"}
-            disablePictureInPicture
-            aria-label={mode === "preview" ? "Scroll Cinema video preview" : "Muted ambient cinema study"}
-          >
-            <source src="/artifacts/scroll-cinema/video-mobile.mp4" media="(max-width: 700px)" type="video/mp4" />
-            <source src="/artifacts/scroll-cinema/video-desktop.mp4" type="video/mp4" />
-          </video>
-          <span className={styles.shade} aria-hidden="true" />
-          {mode === "full" && (
-            <button
-              ref={cinemaTriggerRef}
-              className={styles.cinemaTrigger}
-              type="button"
-              aria-label="View in cinema"
-              onClick={() => openCinemaRef.current()}
+        <div ref={scaleRef} className={styles.scaleWrapper}>
+          <div ref={mediaRef} className={styles.media}>
+            <video
+              ref={ambientVideoRef}
+              className={styles.video}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload={mode === "preview" ? "metadata" : "auto"}
+              disablePictureInPicture
+              aria-label={mode === "preview" ? "Scroll Cinema video preview" : "Muted ambient cinema study"}
             >
-              <span aria-hidden="true" />
-            </button>
-          )}
+              <source src="/artifacts/scroll-cinema/video-mobile.mp4" media="(max-width: 700px)" type="video/mp4" />
+              <source src="/artifacts/scroll-cinema/video-desktop.mp4" type="video/mp4" />
+            </video>
+            <span className={styles.shade} aria-hidden="true" />
+          </div>
         </div>
+
+        {mode === "full" && (
+          <button
+            ref={cinemaTriggerRef}
+            className={styles.cinemaTrigger}
+            type="button"
+            aria-label="View in cinema"
+            onClick={() => openCinemaRef.current()}
+          >
+            <span aria-hidden="true" />
+          </button>
+        )}
 
         {mode === "full" && (
           <p ref={instructionRef} className={styles.instruction}>Scroll to expand</p>

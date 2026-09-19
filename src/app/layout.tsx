@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter_Tight, Syne } from "next/font/google";
-import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import {
   siteDescription,
   siteTitle,
@@ -73,8 +73,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body>
         {children}
-        <GoogleAnalytics />
       </body>
+      {process.env.NODE_ENV === "production" && (
+        <GoogleAnalytics gaId="G-ZXV390DW0Q" />
+      )}
     </html>
   );
 }

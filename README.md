@@ -4,7 +4,7 @@ Artifacts is a growing collection of reusable interactions, motion studies and d
 
 ## Technology
 
-The project uses Next.js App Router, React, TypeScript, SCSS Modules, GSAP, and `next/image`. It is a static experience and does not require a database or authentication. Google Analytics is optional and configured through a public environment variable in production.
+The project uses Next.js App Router, React, TypeScript, SCSS Modules, GSAP, and `next/image`. It is a static experience and does not require a database or authentication. Google Analytics is mounted once at the application root in production.
 
 ## Local setup
 
@@ -86,26 +86,17 @@ GSAP and `@gsap/react` are installed for artifact-level motion. `src/hooks/use-a
 8. Project content and assets are not hard-coded into reusable interaction logic.
 9. Each artifact should work on its detail page and as a lightweight index preview.
 
-No secrets are required. The optional public Google Analytics variable is documented below.
+No secrets or environment variables are required for the static experience.
 
 ## Google Analytics
 
-Production analytics uses the official Next.js Google Analytics integration and is enabled only when `NEXT_PUBLIC_GA_MEASUREMENT_ID` is defined during a production build. Development does not load Google scripts, and omitting the variable leaves analytics disabled without affecting the site.
+GA4 is mounted exactly once in the root App Router layout through the official Next.js integration. It uses measurement ID `G-ZXV390DW0Q` and loads only in production; `npm run dev` does not load Google Analytics.
 
-For local production testing, copy `.env.example` to an ignored `.env.local`, replace the placeholder with a GA4 measurement ID, then run a production build and server. Never commit the local environment file.
+GA4 Enhanced Measurement handles the initial page load, App Router navigation, and browser-history changes. Custom events are limited to `artifact_open`, `theme_change`, and `information_open`; the application does not send a second manual `page_view`.
 
-The integration records page views for the homepage, every artifact route, client-side navigation, and URL history changes. It is also prepared to record `/about` if that route is added. Custom events are limited to `artifact_open`, `theme_change`, and `information_open`.
+Ad blockers and browser privacy tools may prevent local verification. After a production deployment, use **Reports → Realtime** while navigating between the homepage and artifact routes. Realtime events can take several minutes to appear, and the GA Admin data-collection warning may take longer to clear.
 
-To configure Vercel:
-
-1. Open the Vercel project.
-2. Go to **Settings → Environment Variables**.
-3. Add `NEXT_PUBLIC_GA_MEASUREMENT_ID`.
-4. Apply it to **Production**.
-5. Optionally apply it to Preview only when preview traffic should be measured.
-6. Redeploy the latest deployment.
-
-Changing a Vercel environment variable requires a redeployment. After deployment, verify the Google script in the browser network panel and use Google Analytics Realtime or DebugView while navigating between the homepage and artifact routes.
+`NEXT_PUBLIC_GA_MEASUREMENT_ID` is no longer required because no environment-dependent analytics code remains. An existing Vercel variable may be removed manually after the production integration is deployed and verified.
 
 ## Published artifact: Block Orbit
 

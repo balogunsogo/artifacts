@@ -10,9 +10,10 @@
   border: 0;
   border-bottom: 1px solid currentColor;
   background: transparent;
-  color: #fff;
+  color: var(--information-fg, var(--color-text));
   cursor: pointer;
-  mix-blend-mode: difference;
+
+  span { color: inherit; }
 }
 
 .overlay {

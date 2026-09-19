@@ -43,6 +43,21 @@
   .stage[data-artifact="scroll-cinema"] { min-height: 0; }
 }
 
+@media (max-width: 700px) {
+  .scrollStage .info {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    width: 100%;
+    padding:
+      var(--space-3)
+      max(var(--space-3), env(safe-area-inset-right))
+      max(var(--space-3), env(safe-area-inset-bottom))
+      max(var(--space-3), env(safe-area-inset-left));
+  }
+}
+
 @media (max-width: 760px), (max-height: 500px) and (max-width: 900px) {
   .stage[data-artifact="track-transition"] {
     min-height: 0;
