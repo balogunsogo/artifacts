@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Inter_Tight, Syne } from "next/font/google";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import {
   siteDescription,
   siteTitle,
   siteUrl,
   socialDescription,
   socialImage,
-  socialImageAlt,
 } from "./site-metadata";
 import "./globals.scss";
 
@@ -62,7 +62,6 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: siteTitle,
     description: socialDescription,
-    images: [{ url: socialImage.url, alt: socialImageAlt }],
   },
 };
 
@@ -72,7 +71,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitializationScript }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <GoogleAnalytics />
+      </body>
     </html>
   );
 }

@@ -192,17 +192,26 @@
 }
 
 @media (max-width: 700px) {
-  .full { min-height: 76svh; }
-  .artworkFrame { width: min(62vw, 23rem); max-width: 76%; }
+  .full { min-height: inherit; }
+  .artworkStage { padding: 4.5rem 1rem 8rem; }
+  .artworkFrame { width: min(78vw, 42svh, 23rem); max-width: 100%; }
   .paletteReadout { top: 1.25rem; right: 1.25rem; }
   .controls {
-    bottom: 4.75rem;
+    bottom: max(4.75rem, calc(env(safe-area-inset-bottom) + 4rem));
 
     button {
-      width: 2.4rem;
-      height: 2.4rem;
+      width: 2.75rem;
+      height: 2.75rem;
     }
   }
+}
+
+@media (max-height: 500px) and (max-width: 900px) {
+  .full { min-height: inherit; }
+  .artworkStage { padding: 2.75rem 5rem 1rem; }
+  .artworkFrame { width: min(48svh, 13rem); max-width: 55%; }
+  .paletteReadout { top: 0.75rem; right: 1rem; }
+  .controls { bottom: max(0.5rem, env(safe-area-inset-bottom)); }
 }
 
 @media (prefers-reduced-motion: reduce) {

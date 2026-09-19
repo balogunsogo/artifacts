@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { AmbientArtworkPreview } from "@/artifacts/ambient-artwork/AmbientArtworkPreview";
 import type { Artifact } from "@/artifacts/artifact.types";
 import { BlockOrbitPreview } from "@/artifacts/block-orbit/BlockOrbitPreview";
@@ -6,12 +5,13 @@ import { PaletteShiftArtifact } from "@/artifacts/palette-shift/PaletteShiftArti
 import { ScrollCinemaPreview } from "@/artifacts/scroll-cinema/ScrollCinemaPreview";
 import { SplitMenuPreview } from "@/artifacts/split-menu/SplitMenuPreview";
 import { TrackTransitionArtifact } from "@/artifacts/track-transition/TrackTransitionArtifact";
+import { TrackedArtifactLink } from "@/components/analytics/TrackedArtifactLink";
 import styles from "./ArtifactCard.module.scss";
 
 export function ArtifactCard({ artifact }: { artifact: Artifact }) {
   return (
     <article className={styles.card}>
-      <Link href={`/artifacts/${artifact.slug}`} aria-label={`View ${artifact.id} — ${artifact.title}`}>
+      <TrackedArtifactLink artifactId={artifact.id} artifactSlug={artifact.slug} artifactTitle={artifact.title}>
         <div className={styles.preview}>
           {artifact.slug === "block-orbit" ? (
             <BlockOrbitPreview />
@@ -33,7 +33,7 @@ export function ArtifactCard({ artifact }: { artifact: Artifact }) {
         </div>
         <p className={styles.category}>{artifact.category}</p>
         <p className={styles.description}>{artifact.description}</p>
-      </Link>
+      </TrackedArtifactLink>
     </article>
   );
 }

@@ -15,7 +15,7 @@
   overscroll-behavior-inline: contain;
   scroll-behavior: smooth;
   scroll-snap-type: x proximity;
-  scrollbar-color: var(--color-text-muted) transparent;
+  scrollbar-color: var(--color-text-muted) var(--color-border);
   scrollbar-width: thin;
   outline-offset: -3px;
 }
@@ -37,15 +37,17 @@
 .track > article:nth-child(6) { margin-top: clamp(1rem, 3svh, 2rem); }
 
 .collection::-webkit-scrollbar {
-  height: 0.45rem;
+  height: 0.3rem;
 }
 
 .collection::-webkit-scrollbar-thumb {
   background: var(--color-text-muted);
+  border-radius: 0;
 }
 
 .collection::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--color-border);
+  border-radius: 0;
 }
 
 @media (max-width: 900px) {
@@ -58,13 +60,16 @@
 
   .collection {
     height: auto;
-    overflow-y: hidden;
+    overflow: visible;
+    scroll-snap-type: none;
     padding-bottom: env(safe-area-inset-bottom);
   }
 
   .track {
+    display: grid;
+    width: 100%;
+    min-width: 0;
     height: auto;
-    align-items: flex-start;
     gap: clamp(1.25rem, 5vw, 2.5rem);
     padding: clamp(1.5rem, 5vw, 3rem);
     padding-right: max(clamp(1.5rem, 5vw, 3rem), env(safe-area-inset-right));

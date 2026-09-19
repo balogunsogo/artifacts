@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { event } from "@/lib/analytics";
 import styles from "./ThemeToggle.module.scss";
 
 type Theme = "light" | "dark";
@@ -48,6 +49,7 @@ export function ThemeToggle() {
         localStorage.setItem("artifacts-theme", nextTheme);
         applyTheme(nextTheme);
         setTheme(nextTheme);
+        event("theme_change", { theme: nextTheme });
       }}
     >
       <span aria-hidden="true" />

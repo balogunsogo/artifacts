@@ -28,8 +28,26 @@
 }
 
 @media (max-width: 600px) {
-  .stage { min-height: 0; }
+  .stage {
+    min-height: calc(100svh - 6.1rem);
+    min-height: calc(100dvh - 6.1rem);
+  }
   .scrollStage { min-height: 0; }
   .pending { bottom: 5.2rem; }
-  .info { left: var(--space-4); right: auto; }
+  .info {
+    right: auto;
+    bottom: max(var(--space-3), env(safe-area-inset-bottom));
+    left: max(var(--space-3), env(safe-area-inset-left));
+  }
+
+  .stage[data-artifact="scroll-cinema"] { min-height: 0; }
+}
+
+@media (max-height: 500px) and (max-width: 900px) {
+  .stage { min-height: calc(100dvh - 3.75rem); }
+  .scrollStage { min-height: 0; }
+  .info {
+    right: max(var(--space-3), env(safe-area-inset-right));
+    bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
 }

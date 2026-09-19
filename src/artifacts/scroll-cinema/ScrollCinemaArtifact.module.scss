@@ -258,8 +258,15 @@
 }
 
 @media (max-width: 700px) {
-  .stage { min-height: 100svh; }
-  .media { width: calc(100vw - 2rem); }
+  .full { min-height: 0; }
+  .stage {
+    height: auto;
+    min-height: clamp(30rem, 78svh, 44rem);
+    padding: 4.25rem 1rem max(6.5rem, calc(env(safe-area-inset-bottom) + 5rem));
+  }
+  .media { width: min(100%, 40rem); }
+  .instruction { top: 1.25rem; }
+  .cinemaTrigger { width: clamp(3.75rem, 17vw, 4.5rem); }
   .preview .media { width: 82%; }
 }
 

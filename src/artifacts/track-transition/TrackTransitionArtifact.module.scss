@@ -291,26 +291,47 @@
 }
 
 @media (max-width: 760px) {
-  .full { min-height: 76svh; }
+  .full { min-height: inherit; }
   .composition {
     grid-template-columns: 1fr;
     align-content: center;
     gap: 1.5rem;
-    padding: 4.5rem 1.25rem 7rem;
+    padding: 2rem 0 max(6.5rem, calc(env(safe-area-inset-bottom) + 5.5rem));
   }
+  .artworkColumn,
+  .copy { padding-inline: 1rem; }
   .artworkFrame {
-    width: 100%;
+    width: calc(100% + 2rem);
     max-width: none;
+    margin-left: -1rem;
   }
   .position { margin-top: 0.65rem; }
   .eyebrow { margin-bottom: 1.25rem; }
   .title { max-width: 14ch; font-size: clamp(2rem, 10vw, 3.5rem); }
   .artist { margin-top: 1rem; }
   .controls { margin-top: 1.5rem; }
+
+  .committing .artworkFrame { opacity: 1; transform: none; }
+  .arriving .artworkFrame { animation: mobileArtworkArrival 420ms cubic-bezier(0.22, 0.72, 0.2, 1) both; }
 }
 
 @media (max-width: 420px) {
   .title { font-size: clamp(1.85rem, 9.5vw, 3rem); }
+}
+
+@media (max-height: 500px) and (max-width: 900px) {
+  .full { min-height: inherit; }
+  .composition {
+    grid-template-columns: minmax(10rem, 0.72fr) minmax(14rem, 1.28fr);
+    gap: 1.5rem;
+    padding: 1rem 5rem 1rem 1.25rem;
+  }
+  .artworkFrame { width: min(54svh, 13rem); }
+  .position { margin-top: 0.35rem; }
+  .eyebrow { margin-bottom: 0.6rem; }
+  .title { font-size: clamp(1.6rem, 5vw, 2.4rem); }
+  .artist { margin-top: 0.6rem; }
+  .controls { margin-top: 0.75rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -328,4 +349,9 @@
   .arriving .collection,
   .arriving .controls,
   .arriving .titleWord { animation: none; }
+}
+
+@keyframes mobileArtworkArrival {
+  from { opacity: 0.72; transform: scale(0.992); }
+  to { opacity: 1; transform: none; }
 }

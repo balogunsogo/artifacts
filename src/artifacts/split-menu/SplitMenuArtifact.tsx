@@ -407,6 +407,13 @@ export function SplitMenuArtifact({
           <div className={styles.closedStage}>
             <span className={styles.decorativeMark} aria-hidden="true" />
             <span className={styles.featureFrame} aria-hidden="true" />
+            <div className={styles.mobileTeaser} aria-hidden="true">
+              {menuItems.map((item) => (
+                <span key={item.label} className={styles.mobileTeaserCard}>
+                  <Image src={item.image} alt="" fill sizes="22vw" />
+                </span>
+              ))}
+            </div>
             <button
               ref={triggerRef}
               className={styles.openButton}

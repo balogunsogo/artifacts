@@ -32,6 +32,7 @@ yarn-error.log*
 
 # environment files remain local if introduced later
 .env*
+!.env.example
 
 # typescript
 *.tsbuildinfo

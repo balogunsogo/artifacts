@@ -26,7 +26,7 @@ export function ArtifactStage({ artifact }: { artifact: Artifact }) {
   } as CSSProperties;
 
   return (
-    <section className={`${styles.stage} ${isScrollCinema ? styles.scrollStage : ""}`} style={theme} aria-labelledby="artifact-title">
+    <section className={`${styles.stage} ${isScrollCinema ? styles.scrollStage : ""}`} data-artifact={artifact.slug} style={theme} aria-labelledby="artifact-title">
       <div className={styles.visual}>
         {artifact.slug === "block-orbit" ? (
           <BlockOrbitArtifact mode="full" />

@@ -83,8 +83,10 @@
 }
 
 @media (max-width: 700px) {
+  .full { min-height: inherit; }
+
   .stage {
-    --cube-size: clamp(9.5rem, 48vw, 12rem);
+    --cube-size: clamp(10rem, 50vw, 13.5rem);
     perspective: 800px;
     perspective-origin: 50% 50%;
   }
@@ -93,6 +95,10 @@
     --cube-size: clamp(8.75rem, 42vw, 11rem);
     perspective: 700px;
   }
+}
+
+@media (max-width: 900px) {
+  .preview { touch-action: pan-y; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -4,7 +4,7 @@ Artifacts is a growing collection of reusable interactions, motion studies and d
 
 ## Technology
 
-The project uses Next.js App Router, React, TypeScript, SCSS Modules, GSAP, and `next/image`. It is a static experience and does not require a database, authentication, or environment variables.
+The project uses Next.js App Router, React, TypeScript, SCSS Modules, GSAP, and `next/image`. It is a static experience and does not require a database or authentication. Google Analytics is optional and configured through a public environment variable in production.
 
 ## Local setup
 
@@ -86,7 +86,26 @@ GSAP and `@gsap/react` are installed for artifact-level motion. `src/hooks/use-a
 8. Project content and assets are not hard-coded into reusable interaction logic.
 9. Each artifact should work on its detail page and as a lightweight index preview.
 
-No environment variables or secrets are required.
+No secrets are required. The optional public Google Analytics variable is documented below.
+
+## Google Analytics
+
+Production analytics uses the official Next.js Google Analytics integration and is enabled only when `NEXT_PUBLIC_GA_MEASUREMENT_ID` is defined during a production build. Development does not load Google scripts, and omitting the variable leaves analytics disabled without affecting the site.
+
+For local production testing, copy `.env.example` to an ignored `.env.local`, replace the placeholder with a GA4 measurement ID, then run a production build and server. Never commit the local environment file.
+
+The integration records page views for the homepage, every artifact route, client-side navigation, and URL history changes. It is also prepared to record `/about` if that route is added. Custom events are limited to `artifact_open`, `theme_change`, and `information_open`.
+
+To configure Vercel:
+
+1. Open the Vercel project.
+2. Go to **Settings → Environment Variables**.
+3. Add `NEXT_PUBLIC_GA_MEASUREMENT_ID`.
+4. Apply it to **Production**.
+5. Optionally apply it to Preview only when preview traffic should be measured.
+6. Redeploy the latest deployment.
+
+Changing a Vercel environment variable requires a redeployment. After deployment, verify the Google script in the browser network panel and use Google Analytics Realtime or DebugView while navigating between the homepage and artifact routes.
 
 ## Published artifact: Block Orbit
 
@@ -139,3 +158,7 @@ Every request increments a generation token, aborts older image work, clears its
 ## Artwork attribution
 
 Album artwork belongs to the respective artists and rights holders and is presented here as contextual interface content.
+
+## Mobile behavior
+
+Below the archive breakpoint, the homepage changes from a horizontal gallery to a single-column document flow. Artifact pages use dynamic viewport sizing, safe-area-aware controls, and internally scrolling modal panels so browser chrome and mobile orientation changes do not create trapped or unreachable content. Coarse-pointer layouts avoid hover-only interactions, and all primary controls keep a minimum 44px touch target.

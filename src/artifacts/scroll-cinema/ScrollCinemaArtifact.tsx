@@ -211,6 +211,23 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
       if (mode !== "full" || reducedMotion.matches) return;
 
       const mobile = window.matchMedia("(max-width: 700px)").matches;
+      if (mobile || nativeTouch) {
+        const restrainedScale = Math.max(1, Math.min(1.06, targetScale()));
+        scrollTimeline = gsap.timeline()
+          .fromTo(media, { scale: 0.96 }, { scale: restrainedScale, duration: 1, ease: "none" });
+        if (instruction) {
+          scrollTimeline.to(instruction, { opacity: 0.35, y: -6, duration: 0.45, ease: "none" }, 0.2);
+        }
+        scrollTrigger = ScrollTrigger.create({
+          trigger: stage,
+          start: "top 82%",
+          end: "bottom 28%",
+          scrub: 0.45,
+          animation: scrollTimeline,
+          invalidateOnRefresh: true,
+        });
+        return;
+      }
       scrollTimeline = gsap.timeline()
         .to({}, { duration: 0.1 })
         .to(media, { scale: targetScale, borderRadius: 0, duration: 0.65, ease: "none" });
@@ -222,7 +239,7 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
       scrollTrigger = ScrollTrigger.create({
         trigger: root,
         start: "top top",
-        end: () => `+=${(nativeTouch ? stableViewportHeight : window.innerHeight) * (mobile ? 1.15 : 1.8)}`,
+        end: () => `+=${(nativeTouch ? stableViewportHeight : window.innerHeight) * 1.8}`,
         pin: stage,
         pinSpacing: true,
         scrub: 0.6,

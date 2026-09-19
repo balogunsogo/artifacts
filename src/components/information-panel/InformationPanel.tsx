@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import type { Artifact } from "@/artifacts/artifact.types";
+import { event } from "@/lib/analytics";
 import styles from "./InformationPanel.module.scss";
 
 export function InformationPanel({ artifact }: { artifact: Artifact }) {
@@ -14,9 +15,21 @@ export function InformationPanel({ artifact }: { artifact: Artifact }) {
   useEffect(() => {
     if (!open) return;
 
-    const previousOverflow = document.body.style.overflow;
+    const scrollY = window.scrollY;
+    const previousBodyStyles = {
+      position: document.body.style.position,
+      top: document.body.style.top,
+      width: document.body.style.width,
+      overflow: document.body.style.overflow,
+      paddingRight: document.body.style.paddingRight,
+    };
     const trigger = triggerRef.current;
+    const scrollbarWidth = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
     document.body.style.overflow = "hidden";
+    if (scrollbarWidth) document.body.style.paddingRight = `${scrollbarWidth}px`;
     panelRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -31,7 +44,12 @@ export function InformationPanel({ artifact }: { artifact: Artifact }) {
 
     window.addEventListener("keydown", onKeyDown);
     return () => {
-      document.body.style.overflow = previousOverflow;
+      document.body.style.position = previousBodyStyles.position;
+      document.body.style.top = previousBodyStyles.top;
+      document.body.style.width = previousBodyStyles.width;
+      document.body.style.overflow = previousBodyStyles.overflow;
+      document.body.style.paddingRight = previousBodyStyles.paddingRight;
+      window.scrollTo(0, scrollY);
       window.removeEventListener("keydown", onKeyDown);
       trigger?.focus();
     };
@@ -39,7 +57,17 @@ export function InformationPanel({ artifact }: { artifact: Artifact }) {
 
   return (
     <>
-      <button ref={triggerRef} className={styles.trigger} type="button" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen(true)}>
+      <button
+        ref={triggerRef}
+        className={styles.trigger}
+        type="button"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => {
+          event("information_open", { artifact_id: artifact.id, artifact_slug: artifact.slug });
+          setOpen(true);
+        }}
+      >
         Information <span aria-hidden="true">+</span>
       </button>
       {open && (
