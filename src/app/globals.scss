@@ -4,7 +4,9 @@
 
 html {
   background: var(--color-page);
+  scrollbar-gutter: stable;
 }
+
 
 body {
   background: var(--color-page);

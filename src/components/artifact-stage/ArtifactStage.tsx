@@ -26,8 +26,12 @@ export function ArtifactStage({ artifact }: { artifact: Artifact }) {
       : usesPageBackground
         ? "var(--color-page)"
         : artifact.theme.background,
-    "--stage-fg": usesCardBackground || usesPageBackground ? "var(--color-text)" : artifact.theme.foreground,
-    "--information-fg": usesCardBackground || usesPageBackground ? "var(--color-text)" : artifact.theme.foreground,
+
+    "--stage-fg":
+      usesCardBackground || usesPageBackground
+        ? "var(--color-text)"
+        : artifact.theme.foreground,
+
     "--color-accent": artifact.theme.accent,
   } as CSSProperties;
 

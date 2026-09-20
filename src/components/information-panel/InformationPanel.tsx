@@ -7,12 +7,9 @@ import {
   useState,
   type CSSProperties,
 } from "react";
-
 import { createPortal } from "react-dom";
-
 import type { Artifact } from "@/artifacts/artifact.types";
 import { event } from "@/lib/analytics";
-
 import styles from "./InformationPanel.module.scss";
 
 export function InformationPanel({
@@ -20,16 +17,13 @@ export function InformationPanel({
 }: {
   artifact: Artifact;
 }) {
-  const [open, setOpen] =
-    useState(false);
+  const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const panelId = useId();
 
-  const panelRef =
-    useRef<HTMLDivElement>(null);
-
-  const triggerRef =
-    useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   const usesAlbumArtwork = [
     "ambient-artwork",
@@ -37,52 +31,48 @@ export function InformationPanel({
     "track-transition",
   ].includes(artifact.slug);
 
+  /*
+   * Only needed so createPortal runs client-side.
+   * After this, the portal stays mounted permanently.
+   */
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  /*
+   * Modal behaviour + lightweight scroll locking.
+   */
   useEffect(() => {
     if (!open) return;
 
-    const trigger =
-      triggerRef.current;
+    const trigger = triggerRef.current;
+
+    const previousHtmlOverflow =
+      document.documentElement.style.overflow;
 
     const previousBodyOverflow =
       document.body.style.overflow;
 
-    const previousHtmlOverflow =
-      document.documentElement.style
-        .overflow;
-
     /*
-     * Lightweight scroll lock.
+     * Do NOT use:
+     * position: fixed
+     * top
+     * width
+     * window.scrollTo()
      *
-     * Do not switch body to position: fixed.
-     * That was forcing a page-wide layout /
-     * compositing change while artifacts were
-     * actively animating.
+     * Those caused document-wide re-layout/compositing.
      */
-    document.body.style.overflow =
-      "hidden";
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
 
-    document.documentElement.style.overflow =
-      "hidden";
+    const focusFrame = requestAnimationFrame(() => {
+      panelRef.current
+        ?.querySelector<HTMLButtonElement>("button")
+        ?.focus({ preventScroll: true });
+    });
 
-    /*
-     * Give the portal one paint before focusing
-     * the close button.
-     */
-    const focusFrame =
-      requestAnimationFrame(() => {
-        panelRef.current
-          ?.querySelector<HTMLButtonElement>(
-            "button"
-          )
-          ?.focus();
-      });
-
-    const onKeyDown = (
-      keyboardEvent: KeyboardEvent
-    ) => {
-      if (
-        keyboardEvent.key === "Escape"
-      ) {
+    const onKeyDown = (keyboardEvent: KeyboardEvent) => {
+      if (keyboardEvent.key === "Escape") {
         setOpen(false);
         return;
       }
@@ -96,15 +86,12 @@ export function InformationPanel({
 
       const focusable = Array.from(
         panelRef.current.querySelectorAll<HTMLElement>(
-          'button, [href], [tabindex]:not([tabindex="-1"])'
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         )
       );
 
-      const first =
-        focusable[0];
-
-      const last =
-        focusable.at(-1);
+      const first = focusable[0];
+      const last = focusable.at(-1);
 
       if (
         keyboardEvent.shiftKey &&
@@ -123,21 +110,16 @@ export function InformationPanel({
       }
     };
 
-    window.addEventListener(
-      "keydown",
-      onKeyDown
-    );
+    window.addEventListener("keydown", onKeyDown);
 
     return () => {
-      cancelAnimationFrame(
-        focusFrame
-      );
-
-      document.body.style.overflow =
-        previousBodyOverflow;
+      cancelAnimationFrame(focusFrame);
 
       document.documentElement.style.overflow =
         previousHtmlOverflow;
+
+      document.body.style.overflow =
+        previousBodyOverflow;
 
       window.removeEventListener(
         "keydown",
@@ -145,10 +127,14 @@ export function InformationPanel({
       );
 
       requestAnimationFrame(() => {
-        trigger?.focus();
+        trigger?.focus({ preventScroll: true });
       });
     };
   }, [open]);
+
+  const closePanel = () => {
+    setOpen(false);
+  };
 
   return (
     <>
@@ -159,165 +145,98 @@ export function InformationPanel({
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => {
-          event(
-            "information_open",
-            {
-              artifact_id:
-                artifact.id,
-              artifact_slug:
-                artifact.slug,
-            }
-          );
+          event("information_open", {
+            artifact_id: artifact.id,
+            artifact_slug: artifact.slug,
+          });
 
           setOpen(true);
         }}
       >
-        Information{" "}
-        <span aria-hidden="true">
-          +
-        </span>
+        Information
+        <span aria-hidden="true">+</span>
       </button>
 
-      {open &&
-        typeof document !==
-        "undefined" &&
+      {mounted &&
         createPortal(
           <div
-            className={
-              styles.overlay
-            }
-            role="presentation"
+            className={styles.overlay}
+            data-open={open}
+            aria-hidden={!open}
             style={
               {
-                "--color-accent":
-                  artifact.theme
-                    .accent,
+                "--color-accent": artifact.theme.accent,
               } as CSSProperties
             }
-            onMouseDown={(
-              mouseEvent
-            ) => {
+            onMouseDown={(mouseEvent) => {
               if (
+                open &&
                 mouseEvent.target ===
                 mouseEvent.currentTarget
               ) {
-                setOpen(false);
+                closePanel();
               }
             }}
           >
             <div
               ref={panelRef}
               id={panelId}
-              className={
-                styles.panel
-              }
+              className={styles.panel}
+              data-open={open}
               role="dialog"
               aria-modal="true"
               aria-labelledby={`${panelId}-title`}
+              inert={!open}
             >
-              <div
-                className={
-                  styles.panelHeader
-                }
-              >
-                <span>
-                  Artifact information
-                </span>
+              <div className={styles.panelHeader}>
+                <span>Artifact information</span>
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setOpen(false)
-                  }
+                  onClick={closePanel}
                   aria-label="Close information panel"
                 >
                   Close ×
                 </button>
               </div>
 
-              <div
-                className={
-                  styles.panelBody
-                }
-              >
-                <p
-                  className={
-                    styles.number
-                  }
-                >
+              <div className={styles.panelBody}>
+                <p className={styles.number}>
                   {artifact.id}
                 </p>
 
-                <div
-                  className={
-                    styles.details
-                  }
-                >
-                  <h2
-                    id={`${panelId}-title`}
-                  >
+                <div className={styles.details}>
+                  <h2 id={`${panelId}-title`}>
                     {artifact.title}
                   </h2>
 
-                  <p
-                    className={
-                      styles.description
-                    }
-                  >
-                    {
-                      artifact.description
-                    }
+                  <p className={styles.description}>
+                    {artifact.description}
                   </p>
 
                   <dl>
                     <div>
-                      <dt>
-                        Category
-                      </dt>
-                      <dd>
-                        {
-                          artifact.category
-                        }
-                      </dd>
+                      <dt>Category</dt>
+                      <dd>{artifact.category}</dd>
                     </div>
 
                     <div>
-                      <dt>
-                        Origin project
-                      </dt>
-                      <dd>
-                        {
-                          artifact.origin
-                        }
-                      </dd>
+                      <dt>Origin project</dt>
+                      <dd>{artifact.origin}</dd>
                     </div>
 
                     <div>
                       <dt>Year</dt>
-                      <dd>
-                        {
-                          artifact.year
-                        }
-                      </dd>
+                      <dd>{artifact.year}</dd>
                     </div>
                   </dl>
 
                   {usesAlbumArtwork && (
-                    <p
-                      className={
-                        styles.attribution
-                      }
-                    >
-                      Album artwork
-                      belongs to the
-                      respective
-                      artists and
-                      rights holders
-                      and is presented
-                      here as
-                      contextual
-                      interface
-                      content.
+                    <p className={styles.attribution}>
+                      Album artwork belongs to the
+                      respective artists and rights holders
+                      and is presented here as contextual
+                      interface content.
                     </p>
                   )}
                 </div>
