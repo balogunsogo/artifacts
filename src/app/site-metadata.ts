@@ -12,7 +12,7 @@ export const socialImageAlt =
   "The Block Orbit cube from Oluwasogo Balogun’s interaction archive";
 
 export const socialImage = {
-  url: "/opengraph-image.png",
+  url: "/opengraph-image.webp",
   width: 1200,
   height: 630,
   alt: socialImageAlt,
