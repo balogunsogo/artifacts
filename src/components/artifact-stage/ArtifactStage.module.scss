@@ -30,6 +30,7 @@
 .stage[data-artifact="three-image-orbit"] {
   min-height: calc(100dvh - 5.5rem);
   overflow: visible;
+  isolation: auto;
 
   .visual {
     display: grid;
@@ -38,7 +39,10 @@
     padding-bottom: 3.5rem;
     box-sizing: border-box;
     overflow: visible;
-    transform-style: preserve-3d;
+  }
+
+  .visual > div {
+    background: transparent;
   }
 }
 

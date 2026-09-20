@@ -34,7 +34,11 @@
 .track > article:nth-child(3) { margin-top: clamp(5rem, 19svh, 10rem); }
 .track > article:nth-child(4) { margin-top: clamp(2.5rem, 8svh, 4.5rem); }
 .track > article:nth-child(5) { margin-top: clamp(4rem, 14svh, 7.5rem); }
-.track > article:nth-child(6) { margin-top: clamp(1rem, 3svh, 2rem); }
+.track > article:nth-child(6) { margin-top: clamp(2rem, 3svh, 2rem); }
+.track > article:nth-child(6) { margin-top: clamp(1rem, 9svh, 5rem);}
+.track > article:nth-child(7) { margin-top: clamp(0.75rem, 3svh, 1.75rem);}
+.track > article:nth-child(8) { margin-top: clamp(4rem, 15svh, 8rem);}
+
 
 .collection::-webkit-scrollbar {
   height: 0.3rem;

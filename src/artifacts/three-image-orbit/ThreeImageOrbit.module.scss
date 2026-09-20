@@ -1,54 +1,155 @@
 .stage {
   position: relative;
+
   width: min(58rem, 100%);
   height: clamp(14.75rem, 20.75vw, 20.5rem);
+
   margin-inline: auto;
+
   perspective: 1100px;
   perspective-origin: 50% 50%;
+
   transform-style: preserve-3d;
+
   overflow: visible;
 }
 
-.full { min-height: inherit; }
-.full .image { aspect-ratio: 16 / 9; }
+/* -------------------------
+   PREVIEW STAGE
+------------------------- */
+
 .preview {
   width: 100%;
   height: 100%;
   min-height: 0;
+
   perspective: 760px;
 }
 
-.image {
+/* -------------------------
+   3D CARD PLANE
+------------------------- */
+
+.card {
   position: absolute;
+
   top: 50%;
   left: 50%;
-  width: clamp(13rem, 19vw, 19rem);
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  will-change: transform, opacity;
-  background: var(--color-surface);
-  box-shadow: 0 1rem 2rem rgba(20, 19, 17, 0.12);
 
-  img { object-fit: cover; }
+  overflow: visible;
+
+  /*
+   * Do NOT clip or add preserve-3d here.
+   * This element itself is the moving 3D plane.
+   */
+}
+
+/* -------------------------
+   FULL ARTIFACT CARD SHAPES
+------------------------- */
+
+/*
+ * Different silhouettes intentionally prevent
+ * identical landscape rectangles from perfectly
+ * covering one another during orbit crossings.
+ */
+
+.full .card1 {
+  width: clamp(13rem, 18vw, 18rem);
+  aspect-ratio: 4 / 3;
+}
+
+.full .card2 {
+  width: clamp(11rem, 15vw, 15rem);
+  aspect-ratio: 3 / 4;
+}
+
+.full .card3 {
+  width: clamp(12rem, 16vw, 16rem);
+  aspect-ratio: 1 / 1;
+}
+
+/* -------------------------
+   IMAGE CROP
+------------------------- */
+
+.image {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+
+  background: var(--color-surface);
+
+  box-shadow:
+    0 1rem 2rem
+    rgba(20, 19, 17, 0.12);
+
+  img {
+    object-fit: cover;
+  }
+}
+
+/* -------------------------
+   HOMEPAGE PREVIEW
+------------------------- */
+
+/*
+ * Preserve the existing homepage behaviour.
+ * All preview cards remain the same size/shape.
+ */
+
+.preview .card {
+  width: clamp(7.5rem, 15vw, 10rem);
+  aspect-ratio: 4 / 3;
 }
 
 .preview .image {
-  width: clamp(7.5rem, 15vw, 10rem);
-  box-shadow: 0 0.55rem 1.2rem rgba(20, 19, 17, 0.14);
+  box-shadow:
+    0 0.55rem 1.2rem
+    rgba(20, 19, 17, 0.14);
 }
+
+/* -------------------------
+   MOBILE
+------------------------- */
 
 @media (max-width: 700px) {
   .stage {
     height: clamp(19rem, 75vw, 23rem);
+
     perspective: 800px;
   }
 
-  .image { width: clamp(9.5rem, 48vw, 12rem); }
+  /*
+   * Preserve different silhouettes on mobile,
+   * but scale them down appropriately.
+   */
+
+  .full .card1 {
+    width: clamp(9.5rem, 48vw, 12rem);
+    aspect-ratio: 4 / 3;
+  }
+
+  .full .card2 {
+    width: clamp(8.25rem, 41vw, 10.5rem);
+    aspect-ratio: 3 / 4;
+  }
+
+  .full .card3 {
+    width: clamp(8.75rem, 44vw, 11rem);
+    aspect-ratio: 1 / 1;
+  }
 }
 
+/* -------------------------
+   REDUCED MOTION
+------------------------- */
+
 @media (prefers-reduced-motion: reduce) {
-  .image { will-change: auto; }
+  .card {
+    will-change: auto;
+  }
 }

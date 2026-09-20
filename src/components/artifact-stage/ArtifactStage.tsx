@@ -40,10 +40,20 @@ export function ArtifactStage({ artifact }: { artifact: Artifact }) {
           <SplitMenuArtifact mode="full" />
         ) : artifact.slug === "three-image-orbit" ? (
           <ThreeImageOrbit
+            mode="full"
             images={[
-              { src: spatialServices[1].image, alt: spatialServices[1].imageAlt },
-              { src: spatialServices[2].image, alt: spatialServices[2].imageAlt },
-              { src: spatialServices[3].image, alt: spatialServices[3].imageAlt },
+              {
+                src: spatialServices[1].image,
+                alt: spatialServices[1].imageAlt,
+              },
+              {
+                src: spatialServices[2].image,
+                alt: spatialServices[2].imageAlt,
+              },
+              {
+                src: spatialServices[3].image,
+                alt: spatialServices[3].imageAlt,
+              },
             ]}
           />
         ) : artifact.slug === "scroll-cinema" ? (
