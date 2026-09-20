@@ -1,5 +1,39 @@
 @use "../../styles/mixins" as *;
 
+/* Default: light-page artifacts use dark controls */
+.stage {
+  --information-fg: var(--color-text);
+}
+
+/* Explicit light-background artifacts */
+.stage[data-artifact="block-orbit"],
+.stage[data-artifact="split-menu"],
+.stage[data-artifact="three-image-orbit"],
+.stage[data-artifact="spatial-services"] {
+  --information-fg: var(--color-text);
+}
+
+/* Dark-background artifacts */
+.stage[data-artifact="ambient-artwork"],
+.stage[data-artifact="palette-shift"],
+.stage[data-artifact="track-transition"] {
+  --information-fg: #fff;
+}
+
+/* Scroll Cinema starts on the light page */
+.stage[data-artifact="scroll-cinema"] {
+  --information-fg: var(--color-text);
+}
+
+/* When the expanded video reaches the control */
+.stage[data-artifact="scroll-cinema"][data-information-theme="light"] {
+  --information-fg: #fff;
+}
+
+.stage[data-artifact="scroll-cinema"][data-information-theme="dark"] {
+  --information-fg: var(--color-text);
+}
+
 .stage {
   position: relative;
   min-height: calc(100svh - 5.5rem);
@@ -45,6 +79,7 @@
     background: transparent;
   }
 }
+
 
 @media (max-width: 600px) {
   .stage {

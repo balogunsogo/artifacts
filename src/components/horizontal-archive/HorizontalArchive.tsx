@@ -19,6 +19,7 @@ export function HorizontalArchive({ children, className, trackClassName, labelle
     const resetMobilePosition = () => {
       if (!desktop.matches) scroller.scrollLeft = 0;
     };
+    
     const onWheel = (event: WheelEvent) => {
       if (!desktop.matches || event.shiftKey || Math.abs(event.deltaX) >= Math.abs(event.deltaY)) return;
       const maximum = scroller.scrollWidth - scroller.clientWidth;
@@ -29,6 +30,7 @@ export function HorizontalArchive({ children, className, trackClassName, labelle
       event.preventDefault();
       scroller.scrollBy({ left: event.deltaY, behavior: "auto" });
     };
+
     resetMobilePosition();
     scroller.addEventListener("wheel", onWheel, { passive: false });
     desktop.addEventListener("change", resetMobilePosition);
