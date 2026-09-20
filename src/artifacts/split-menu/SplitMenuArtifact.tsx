@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import { spatialServices } from "@/artifacts/spatial-services/spatial-services.data";
 import styles from "./SplitMenuArtifact.module.scss";
 
 gsap.registerPlugin(useGSAP);
@@ -17,12 +18,7 @@ export type SplitMenuArtifactProps = {
 type MenuState = "closed" | "opening" | "open" | "closing";
 type CardGeometry = { left: number; bottom: number; width: number; height: number };
 
-const menuItems = [
-  { label: "About", image: "/artifacts/split-menu/panel-01.png" },
-  { label: "Process", image: "/artifacts/split-menu/panel-02.png" },
-  { label: "Work", image: "/artifacts/split-menu/panel-03.png" },
-  { label: "Contact", image: "/artifacts/split-menu/panel-04.png" },
-] as const;
+const menuItems = spatialServices.slice(0, 4);
 
 export function SplitMenuArtifact({
   mode = "full",
@@ -370,6 +366,7 @@ export function SplitMenuArtifact({
                 alt=""
                 fill
                 sizes={mode === "preview" ? "(max-width: 560px) 24vw, 10rem" : "(max-width: 700px) 86vw, 25vw"}
+                style={{ objectPosition: item.objectPosition }}
               />
             </span>
           </>

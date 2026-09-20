@@ -20,10 +20,10 @@
 
 .preview[data-motion="running"] .frame { animation-play-state: running; }
 
-.frame video {
+.frame iframe {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  border: 0;
 }
 
 @keyframes cinema-preview {

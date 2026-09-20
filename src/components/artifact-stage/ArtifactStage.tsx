@@ -5,6 +5,9 @@ import { BlockOrbitArtifact } from "@/artifacts/block-orbit/BlockOrbitArtifact";
 import { PaletteShiftArtifact } from "@/artifacts/palette-shift/PaletteShiftArtifact";
 import { ScrollCinemaArtifact } from "@/artifacts/scroll-cinema/ScrollCinemaArtifact";
 import { SplitMenuArtifact } from "@/artifacts/split-menu/SplitMenuArtifact";
+import { SpatialServicesArtifact } from "@/artifacts/spatial-services/SpatialServicesArtifact";
+import { spatialServices } from "@/artifacts/spatial-services/spatial-services.data";
+import { ThreeImageOrbit } from "@/artifacts/three-image-orbit/ThreeImageOrbit";
 import { TrackTransitionArtifact } from "@/artifacts/track-transition/TrackTransitionArtifact";
 import { InformationPanel } from "@/components/information-panel/InformationPanel";
 import styles from "./ArtifactStage.module.scss";
@@ -14,7 +17,9 @@ export function ArtifactStage({ artifact }: { artifact: Artifact }) {
   const usesCardBackground = artifact.slug === "block-orbit";
   const usesPageBackground = artifact.slug === "split-menu"
     || artifact.slug === "scroll-cinema"
-    || artifact.slug === "ambient-artwork";
+    || artifact.slug === "ambient-artwork"
+    || artifact.slug === "spatial-services"
+    || artifact.slug === "three-image-orbit";
   const theme = {
     "--stage-bg": usesCardBackground
       ? "var(--card-preview-bg)"
@@ -33,10 +38,20 @@ export function ArtifactStage({ artifact }: { artifact: Artifact }) {
           <BlockOrbitArtifact mode="full" />
         ) : artifact.slug === "split-menu" ? (
           <SplitMenuArtifact mode="full" />
+        ) : artifact.slug === "three-image-orbit" ? (
+          <ThreeImageOrbit
+            images={[
+              { src: spatialServices[1].image, alt: spatialServices[1].imageAlt },
+              { src: spatialServices[2].image, alt: spatialServices[2].imageAlt },
+              { src: spatialServices[3].image, alt: spatialServices[3].imageAlt },
+            ]}
+          />
         ) : artifact.slug === "scroll-cinema" ? (
           <ScrollCinemaArtifact mode="full" />
         ) : artifact.slug === "ambient-artwork" ? (
           <AmbientArtworkArtifact mode="full" />
+        ) : artifact.slug === "spatial-services" ? (
+          <SpatialServicesArtifact />
         ) : artifact.slug === "palette-shift" ? (
           <PaletteShiftArtifact mode="full" />
         ) : (

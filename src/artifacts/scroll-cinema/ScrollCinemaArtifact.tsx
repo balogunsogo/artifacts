@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { loadYouTubeApi, scrollCinemaVideoId, type YouTubePlayer, youtubePlayerVars } from "./youtube-player";
 import styles from "./ScrollCinemaArtifact.module.scss";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -20,11 +21,11 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
   const stageRef = useRef<HTMLDivElement>(null);
   const scaleRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
-  const ambientVideoRef = useRef<HTMLVideoElement>(null);
+  const ambientPlayerHostRef = useRef<HTMLDivElement>(null);
   const instructionRef = useRef<HTMLParagraphElement>(null);
   const cinemaTriggerRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const cinemaVideoRef = useRef<HTMLVideoElement>(null);
+  const cinemaPlayerHostRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const openCinemaRef = useRef<() => void>(() => undefined);
   const closeCinemaRef = useRef<() => void>(() => undefined);
@@ -36,13 +37,12 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
     const stage = stageRef.current;
     const scaleWrapper = scaleRef.current;
     const media = mediaRef.current;
-    const ambientVideo = ambientVideoRef.current;
-    if (!root || !stage || !scaleWrapper || !media || !ambientVideo) return;
+    const ambientPlayerHost = ambientPlayerHostRef.current;
+    if (!root || !stage || !scaleWrapper || !media || !ambientPlayerHost) return;
 
     const instruction = instructionRef.current;
     const triggerButton = cinemaTriggerRef.current;
     const dialog = dialogRef.current;
-    const cinemaVideo = cinemaVideoRef.current;
     const closeButton = closeButtonRef.current;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const touchPointer = window.matchMedia("(hover: none), (pointer: coarse)");
@@ -56,25 +56,22 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
     let transitionTimer: number | null = null;
     let focusFrame: number | null = null;
     let restoreScroll: (() => void) | null = null;
+    let ambientPlayer: YouTubePlayer | null = null;
+    let cinemaPlayer: YouTubePlayer | null = null;
+    let pendingOpen = false;
     let stableViewportHeight = stage.getBoundingClientRect().height || window.innerHeight;
     let lastWidth = window.innerWidth;
     let lastHeight = window.innerHeight;
 
-    ambientVideo.defaultMuted = true;
-    ambientVideo.muted = true;
-
-    const safePlay = (video: HTMLVideoElement) => {
-      void video.play().catch(() => undefined);
-    };
-
     const syncAmbientPlayback = () => {
-      ambientVideo.muted = true;
+      if (!ambientPlayer) return;
       const shouldPlay = visible
         && !document.hidden
         && cinemaState === "closed"
         && !reducedMotion.matches;
-      if (shouldPlay) safePlay(ambientVideo);
-      else ambientVideo.pause();
+      ambientPlayer.mute();
+      if (shouldPlay) ambientPlayer.playVideo();
+      else ambientPlayer.pauseVideo();
     };
 
     const lockScroll = () => {
@@ -112,10 +109,10 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
     const finishClose = (restoreFocus: boolean, resumeAmbient = true) => {
       if (transitionTimer !== null) window.clearTimeout(transitionTimer);
       transitionTimer = null;
-      cinemaVideo?.pause();
-      if (cinemaVideo) {
-        cinemaVideo.muted = true;
-        try { cinemaVideo.currentTime = 0; } catch { /* Metadata may not be ready. */ }
+      cinemaPlayer?.pauseVideo();
+      if (cinemaPlayer) {
+        cinemaPlayer.mute();
+        cinemaPlayer.seekTo(0, true);
       }
       if (dialog?.open) dialog.close();
       setCinemaState("closed");
@@ -130,7 +127,7 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
       if (!dialog || cinemaState !== "open") return;
       setCinemaState("closing");
       dialog.inert = true;
-      cinemaVideo?.pause();
+      cinemaPlayer?.pauseVideo();
       transitionTimer = window.setTimeout(
         () => finishClose(true),
         reducedMotion.matches ? 0 : 220,
@@ -138,19 +135,21 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
     };
 
     const openCinema = () => {
-      if (mode !== "full" || !dialog || !cinemaVideo || cinemaState !== "closed") return;
+      if (mode !== "full" || !dialog || cinemaState !== "closed") return;
+      if (!cinemaPlayer) {
+        pendingOpen = true;
+        return;
+      }
       setCinemaState("opening");
-      ambientVideo.pause();
-      const savedTime = Number.isFinite(ambientVideo.currentTime) ? ambientVideo.currentTime : 0;
+      ambientPlayer?.pauseVideo();
+      const savedTime = ambientPlayer ? ambientPlayer.getCurrentTime() : 0;
       restoreScroll = lockScroll();
       dialog.showModal();
       dialog.inert = true;
-      cinemaVideo.muted = false;
-      cinemaVideo.volume = 1;
-      try { cinemaVideo.currentTime = savedTime; } catch { /* Metadata may not be ready. */ }
-      void cinemaVideo.play().catch(() => {
-        if (mounted) setCinemaPlaying(false);
-      });
+      cinemaPlayer.unMute();
+      cinemaPlayer.setVolume(100);
+      cinemaPlayer.seekTo(savedTime, true);
+      cinemaPlayer.playVideo();
 
       transitionTimer = window.setTimeout(() => {
         transitionTimer = null;
@@ -165,13 +164,13 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
     };
 
     const toggleCinemaPlayback = () => {
-      if (!cinemaVideo || cinemaState !== "open") return;
-      if (cinemaVideo.paused || cinemaVideo.ended) {
-        cinemaVideo.muted = false;
-        cinemaVideo.volume = 1;
-        safePlay(cinemaVideo);
+      if (!cinemaPlayer || cinemaState !== "open") return;
+      if (cinemaPlayer.getPlayerState() !== 1) {
+        cinemaPlayer.unMute();
+        cinemaPlayer.setVolume(100);
+        cinemaPlayer.playVideo();
       } else {
-        cinemaVideo.pause();
+        cinemaPlayer.pauseVideo();
       }
     };
 
@@ -183,14 +182,7 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
       event.preventDefault();
       closeCinema();
     };
-    const onCinemaPlay = () => setCinemaPlaying(true);
-    const onCinemaPause = () => setCinemaPlaying(false);
-    const onCinemaEnded = () => setCinemaPlaying(false);
-
     dialog?.addEventListener("cancel", onDialogCancel);
-    cinemaVideo?.addEventListener("play", onCinemaPlay);
-    cinemaVideo?.addEventListener("pause", onCinemaPause);
-    cinemaVideo?.addEventListener("ended", onCinemaEnded);
 
     const targetScale = () => {
       const bounds = scaleWrapper.getBoundingClientRect();
@@ -267,8 +259,6 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
       syncAmbientPlayback();
     };
     const onVisibilityChange = () => syncAmbientPlayback();
-    const onLoadedMetadata = () => scheduleRefresh();
-
     const visibilityObserver = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting && entry.intersectionRatio >= 0.04;
       syncAmbientPlayback();
@@ -279,8 +269,36 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
     reducedMotion.addEventListener("change", onReducedMotionChange);
     window.addEventListener("resize", onResize, { passive: true });
     window.addEventListener("orientationchange", onOrientationChange);
-    ambientVideo.addEventListener("loadedmetadata", onLoadedMetadata);
     buildScrollScene();
+    void loadYouTubeApi().then((YouTube) => {
+      if (!mounted || !ambientPlayerHost) return;
+      const createPlayer = (host: HTMLElement, muted: boolean, onStateChange?: (state: number) => void) => new YouTube.Player(host, {
+        height: "100%",
+        width: "100%",
+        videoId: scrollCinemaVideoId,
+        playerVars: youtubePlayerVars(muted),
+        events: {
+          onReady: ({ target }) => {
+            if (muted) {
+              target.mute();
+              syncAmbientPlayback();
+            }
+          },
+          onStateChange: (event) => onStateChange?.(event.data),
+        },
+      });
+      ambientPlayer = createPlayer(ambientPlayerHost, true);
+      if (cinemaPlayerHostRef.current) {
+        cinemaPlayer = createPlayer(cinemaPlayerHostRef.current, false, (state) => {
+          if (mounted) setCinemaPlaying(state === 1);
+        });
+      }
+      syncAmbientPlayback();
+      if (pendingOpen) {
+        pendingOpen = false;
+        openCinema();
+      }
+    }).catch(() => undefined);
     void document.fonts?.ready.then(() => {
       if (mounted) scheduleRefresh();
     });
@@ -295,20 +313,18 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
       reducedMotion.removeEventListener("change", onReducedMotionChange);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("orientationchange", onOrientationChange);
-      ambientVideo.removeEventListener("loadedmetadata", onLoadedMetadata);
       dialog?.removeEventListener("cancel", onDialogCancel);
-      cinemaVideo?.removeEventListener("play", onCinemaPlay);
-      cinemaVideo?.removeEventListener("pause", onCinemaPause);
-      cinemaVideo?.removeEventListener("ended", onCinemaEnded);
       if (refreshTimer !== null) window.clearTimeout(refreshTimer);
       if (transitionTimer !== null) window.clearTimeout(transitionTimer);
       if (focusFrame !== null) window.cancelAnimationFrame(focusFrame);
       scrollTrigger?.kill(true);
       scrollTimeline?.kill();
       gsap.killTweensOf([scaleWrapper, media, instruction].filter(Boolean));
-      ambientVideo.pause();
-      cinemaVideo?.pause();
+      ambientPlayer?.pauseVideo();
+      cinemaPlayer?.pauseVideo();
       finishClose(false, false);
+      ambientPlayer?.destroy();
+      cinemaPlayer?.destroy();
     };
   }, { scope: rootRef, dependencies: [mode], revertOnUpdate: true });
 
@@ -321,20 +337,7 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
       <div ref={stageRef} className={styles.stage}>
         <div ref={scaleRef} className={styles.scaleWrapper}>
           <div ref={mediaRef} className={styles.media}>
-            <video
-              ref={ambientVideoRef}
-              className={styles.video}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload={mode === "preview" ? "metadata" : "auto"}
-              disablePictureInPicture
-              aria-label={mode === "preview" ? "Scroll Cinema video preview" : "Muted ambient cinema study"}
-            >
-              <source src="/artifacts/scroll-cinema/video-mobile.mp4" media="(max-width: 700px)" type="video/mp4" />
-              <source src="/artifacts/scroll-cinema/video-desktop.mp4" type="video/mp4" />
-            </video>
+            <div ref={ambientPlayerHostRef} className={styles.video} aria-label={mode === "preview" ? "Scroll Cinema video preview" : "Muted ambient cinema study"} />
             <span className={styles.shade} aria-hidden="true" />
           </div>
         </div>
@@ -359,17 +362,7 @@ export function ScrollCinemaArtifact({ mode = "full", className }: ScrollCinemaA
       {mode === "full" && (
         <dialog ref={dialogRef} className={styles.dialog} data-state="closed" aria-label="Scroll Cinema video player">
           <div className={styles.cinemaFrame}>
-            <video
-              ref={cinemaVideoRef}
-              className={styles.cinemaVideo}
-              loop
-              playsInline
-              preload="metadata"
-              disablePictureInPicture
-            >
-              <source src="/artifacts/scroll-cinema/video-mobile.mp4" media="(max-width: 700px)" type="video/mp4" />
-              <source src="/artifacts/scroll-cinema/video-desktop.mp4" type="video/mp4" />
-            </video>
+            <div ref={cinemaPlayerHostRef} className={styles.cinemaVideo} />
           </div>
           <div className={styles.cinemaControls}>
             <button

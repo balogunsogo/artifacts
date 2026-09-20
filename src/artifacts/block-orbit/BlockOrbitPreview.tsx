@@ -5,7 +5,14 @@ import { useEffect, useRef } from "react";
 import styles from "./BlockOrbitArtifact.module.scss";
 
 const faces = ["front", "right", "back", "left", "top", "bottom"] as const;
-const images = ["face-01.png", "face-02.png", "face-03.png"] as const;
+const images = [
+  "face-green.svg",
+  "face-rust.svg",
+  "face-blue.svg",
+  "face-cream.svg",
+  "face-lilac.svg",
+  "face-charcoal.svg",
+] as const;
 
 export function BlockOrbitPreview() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -40,7 +47,7 @@ export function BlockOrbitPreview() {
   }, []);
 
   return (
-    <div ref={rootRef} className={`${styles.stage} ${styles.preview}`} role="img" aria-label="Orbiting three-dimensional image cube">
+    <div ref={rootRef} className={`${styles.stage} ${styles.preview}`} role="img" aria-label="Orbiting three-dimensional b logo cube">
       <div className={styles.tilt}>
         <div ref={cubeRef} className={styles.cube} data-paused="true" aria-hidden="true">
           {faces.map((face, index) => (

@@ -1,0 +1,13 @@
+.preview { position: relative; display: grid; grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr); gap: clamp(0.7rem, 2vw, 1.2rem); width: 100%; height: 100%; min-height: 12rem; overflow: hidden; padding: clamp(1rem, 3.5vw, 1.5rem); border: 1px solid var(--color-border); background: var(--card-preview-bg); color: var(--color-text); }
+.list { align-self: center; display: grid; min-width: 0; }
+.list span { position: relative; display: flex; min-width: 0; min-height: 2.7rem; align-items: center; overflow: hidden; padding: 0.55rem 0; border-bottom: 1px solid var(--color-border); color: var(--color-text-muted); font-size: clamp(0.72rem, 1.25vw, 0.92rem); line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; transition: color 220ms ease; }
+.list span.active { color: var(--color-text); }
+.list span i { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; transform: scaleX(0); transform-origin: left center; background: var(--color-accent); content: ""; }
+.list span.active i { transform: scaleX(1); transition: transform 2.8s linear; }
+.image { position: relative; align-self: center; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; background: var(--color-surface); }
+.image img { object-fit: cover; opacity: 0; clip-path: inset(0 100% 0 0); filter: saturate(0.86); transform: scale(1.02); transition: opacity 180ms ease, clip-path 520ms var(--ease-out), transform 620ms var(--ease-out); }
+.image img.visible { opacity: 1; clip-path: inset(0 0% 0 0); transform: scale(1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .list span i, .image img { transition: none; }
+}

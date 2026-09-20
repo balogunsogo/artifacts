@@ -27,6 +27,21 @@
   .pending, .info { z-index: 2; }
 }
 
+.stage[data-artifact="three-image-orbit"] {
+  min-height: calc(100dvh - 5.5rem);
+  overflow: visible;
+
+  .visual {
+    display: grid;
+    min-height: inherit;
+    place-items: center;
+    padding-bottom: 3.5rem;
+    box-sizing: border-box;
+    overflow: visible;
+    transform-style: preserve-3d;
+  }
+}
+
 @media (max-width: 600px) {
   .stage {
     min-height: calc(100svh - 6.1rem);
@@ -52,6 +67,32 @@
     width: 100%;
     padding:
       var(--space-3)
+      max(var(--space-3), env(safe-area-inset-right))
+      max(var(--space-3), env(safe-area-inset-bottom))
+      max(var(--space-3), env(safe-area-inset-left));
+  }
+}
+
+@media (max-width: 767px) {
+  .stage[data-artifact="spatial-services"] {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .stage[data-artifact="spatial-services"] .visual {
+    position: relative;
+    inset: auto;
+  }
+
+  .stage[data-artifact="spatial-services"] .info {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    margin-top: var(--space-3);
+    padding:
+      0
       max(var(--space-3), env(safe-area-inset-right))
       max(var(--space-3), env(safe-area-inset-bottom))
       max(var(--space-3), env(safe-area-inset-left));

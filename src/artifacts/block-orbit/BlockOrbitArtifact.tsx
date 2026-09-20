@@ -15,7 +15,14 @@ export type BlockOrbitArtifactProps = {
 };
 
 const faces = ["front", "right", "back", "left", "top", "bottom"] as const;
-const images = ["face-01.png", "face-02.png", "face-03.png"] as const;
+const images = [
+  "face-green.svg",
+  "face-rust.svg",
+  "face-blue.svg",
+  "face-cream.svg",
+  "face-lilac.svg",
+  "face-charcoal.svg",
+] as const;
 
 export function BlockOrbitArtifact({
   mode = "full",
@@ -126,7 +133,7 @@ export function BlockOrbitArtifact({
       ref={stageRef}
       className={stageClassName}
       role="img"
-      aria-label="Rotating three-dimensional cube featuring selected visual work"
+      aria-label="Rotating three-dimensional b logo cube"
     >
       <div ref={tiltRef} className={styles.tilt}>
         <div ref={cubeRef} className={styles.cube} data-paused="true" aria-hidden="true">

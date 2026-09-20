@@ -1,0 +1,54 @@
+.stage {
+  position: relative;
+  width: min(58rem, 100%);
+  height: clamp(14.75rem, 20.75vw, 20.5rem);
+  margin-inline: auto;
+  perspective: 1100px;
+  perspective-origin: 50% 50%;
+  transform-style: preserve-3d;
+  overflow: visible;
+}
+
+.full { min-height: inherit; }
+.full .image { aspect-ratio: 16 / 9; }
+.preview {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  perspective: 760px;
+}
+
+.image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(13rem, 19vw, 19rem);
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform, opacity;
+  background: var(--color-surface);
+  box-shadow: 0 1rem 2rem rgba(20, 19, 17, 0.12);
+
+  img { object-fit: cover; }
+}
+
+.preview .image {
+  width: clamp(7.5rem, 15vw, 10rem);
+  box-shadow: 0 0.55rem 1.2rem rgba(20, 19, 17, 0.14);
+}
+
+@media (max-width: 700px) {
+  .stage {
+    height: clamp(19rem, 75vw, 23rem);
+    perspective: 800px;
+  }
+
+  .image { width: clamp(9.5rem, 48vw, 12rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image { will-change: auto; }
+}
