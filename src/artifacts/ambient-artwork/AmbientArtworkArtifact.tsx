@@ -1,9 +1,28 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { AMBIENT_ARTWORK_TRACK, ARCHIVE_TRACKS } from "@/artifacts/_shared/music/tracks";
+import { createAmbientArtworkTouch } from "./ambient-artwork-touch";
 import styles from "./AmbientArtworkArtifact.module.scss";
+
+const coarsePointerQuery = "(pointer: coarse)";
+
+function subscribeToCoarsePointer(onChange: () => void) {
+  const query = window.matchMedia(coarsePointerQuery);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
+
+// False on the server and on fine pointers, so desktop never renders the viewer or wires touch input.
+function useCoarsePointer() {
+  return useSyncExternalStore(
+    subscribeToCoarsePointer,
+    () => window.matchMedia(coarsePointerQuery).matches,
+    () => false,
+  );
+}
 
 export type AmbientArtworkArtifactProps = {
   mode?: "preview" | "full";
@@ -34,6 +53,12 @@ export function AmbientArtworkArtifact({
   const artworkRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState(playbackState);
   const [currentArtworkSrc, setCurrentArtworkSrc] = useState(artworkSrc);
+  const viewerRef = useRef<HTMLDivElement>(null);
+  const viewerBackdropRef = useRef<HTMLDivElement>(null);
+  const viewerFrameRef = useRef<HTMLDivElement>(null);
+  const viewerCloseRef = useRef<HTMLButtonElement>(null);
+  const coarsePointer = useCoarsePointer();
+  const touchViewer = coarsePointer && interactive && mode === "full";
 
   useEffect(() => {
     const root = rootRef.current;
@@ -191,6 +216,20 @@ export function AmbientArtworkArtifact({
     };
   }, [interactive, mode]);
 
+  // Touch depth + fullscreen viewer. A layout effect so a capability change or unmount puts the
+  // artwork back in its slot within the same commit that removes the viewer, before any paint.
+  useLayoutEffect(() => {
+    if (!touchViewer) return;
+    const stage = artStageRef.current;
+    const artwork = artworkRef.current;
+    const viewer = viewerRef.current;
+    const backdrop = viewerBackdropRef.current;
+    const frame = viewerFrameRef.current;
+    const close = viewerCloseRef.current;
+    if (!stage || !artwork || !viewer || !backdrop || !frame || !close) return;
+    return createAmbientArtworkTouch({ stage, artwork, viewer, backdrop, frame, close });
+  }, [touchViewer]);
+
   const rootClassName = [
     styles.root,
     mode === "preview" ? styles.preview : styles.full,
@@ -250,6 +289,25 @@ export function AmbientArtworkArtifact({
             </svg>
           </button>
         </div>
+      )}
+
+      {touchViewer && createPortal(
+        <div
+          ref={viewerRef}
+          className={styles.viewer}
+          role="dialog"
+          tabIndex={-1}
+          aria-modal="true"
+          aria-label="Album artwork"
+          data-state={state}
+        >
+          <div ref={viewerBackdropRef} className={styles.viewerBackdrop} aria-hidden="true" />
+          <button ref={viewerCloseRef} className={styles.viewerClose} type="button" aria-label="Close artwork">
+            <span className={styles.viewerCloseIcon} aria-hidden="true" />
+          </button>
+          <div ref={viewerFrameRef} className={styles.viewerFrame} />
+        </div>,
+        document.body,
       )}
     </div>
   );

@@ -206,3 +206,182 @@
   .reflection { display: none; }
   .full .image { animation: none; }
 }
+
+/* Touch artwork depth + fullscreen artwork viewer (ambient-artwork-touch.ts). */
+
+/* Only the touch viewer sets this attribute: reparenting would otherwise replay the arrival fade. */
+.full .image[data-arrived] { animation: none; }
+
+@media (pointer: coarse) {
+  /* Perspective lives in the artwork's own transform on touch, so it travels with it into the viewer. */
+  .full .artStage { perspective: none; }
+
+  .full .artwork,
+  .viewer .artwork {
+    --touch-tilt-x: 0deg;
+    --touch-tilt-y: 0deg;
+    --touch-shift-x: 0%;
+    --touch-shift-y: 0%;
+    --touch-press: 1;
+    --touch-depth-scale: 1;
+    --touch-reflection-shift: 0%;
+    --touch-reflection-opacity: 0.12;
+    --touch-shadow-x: 0px;
+    border-radius: calc(5px * var(--touch-depth-scale));
+    box-shadow:
+      calc(var(--touch-shadow-x) * var(--touch-depth-scale))
+      calc(24px * var(--touch-depth-scale))
+      calc(60px * var(--touch-depth-scale))
+      rgba(20, 18, 14, 0.33);
+    /* Shift is a % of the artwork's own size, so it survives the move between page and fullscreen unchanged. */
+    transform:
+      translate3d(var(--touch-shift-x), var(--touch-shift-y), 0)
+      perspective(calc(900px * var(--touch-depth-scale)))
+      rotateX(var(--touch-tilt-x))
+      rotateY(var(--touch-tilt-y))
+      scale(var(--touch-press));
+    will-change: transform;
+    touch-action: pan-y;
+    touch-action: pan-y pinch-zoom;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .full.paused .artwork,
+  .viewer[data-state="paused"] .artwork {
+    filter: saturate(0.76) brightness(0.91);
+    box-shadow:
+      calc(var(--touch-shadow-x) * var(--touch-depth-scale))
+      calc(18px * var(--touch-depth-scale))
+      calc(48px * var(--touch-depth-scale))
+      rgba(20, 18, 14, 0.27);
+  }
+
+  /* When the page cannot scroll, vertical finger movement is free to drive the tilt. */
+  .full .artwork[data-tilt-exclusive] {
+    touch-action: none;
+    touch-action: pinch-zoom;
+  }
+
+  .full .artwork .image,
+  .viewer .image {
+    pointer-events: none;
+    -webkit-user-drag: none;
+  }
+
+  .full .artwork .reflection,
+  .viewer .reflection {
+    opacity: var(--touch-reflection-opacity);
+    transform: translate3d(var(--touch-reflection-shift), 0, calc(26px * var(--touch-depth-scale)));
+  }
+
+  .full.paused .artwork .reflection,
+  .viewer[data-state="paused"] .reflection { opacity: 0.035; }
+
+  .viewer {
+    --viewer-safe-x: max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+    --viewer-safe-y: max(env(safe-area-inset-top, 0px), env(safe-area-inset-bottom, 0px));
+    --viewer-height: 100vh;
+    --viewer-gutter: 1rem;
+    --viewer-control-space: 4.25rem;
+    /* Largest centred square that keeps the close control clear, either above it (portrait) or beside it (landscape). */
+    --viewer-size: min(
+      max(
+        min(
+          calc(100vw - 2 * (var(--viewer-safe-x) + var(--viewer-gutter))),
+          calc(var(--viewer-height) - 2 * (var(--viewer-safe-y) + var(--viewer-control-space)))
+        ),
+        min(
+          calc(100vw - 2 * (var(--viewer-safe-x) + var(--viewer-control-space))),
+          calc(var(--viewer-height) - 2 * (var(--viewer-safe-y) + var(--viewer-gutter)))
+        )
+      ),
+      64rem
+    );
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--layer-panel) + 10);
+    display: none;
+    place-items: center;
+    overscroll-behavior: contain;
+    /* One finger belongs to the artwork; two-finger pinch-zoom stays with the browser. */
+    touch-action: none;
+    touch-action: pinch-zoom;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @supports (height: 100dvh) {
+    .viewer { --viewer-height: 100dvh; }
+  }
+
+  .viewer[data-active] { display: grid; }
+  .viewer:focus { outline: none; }
+
+  .viewerBackdrop {
+    position: absolute;
+    inset: 0;
+    background: #050505;
+    opacity: 0;
+  }
+
+  .viewerFrame {
+    position: relative;
+    z-index: 1;
+    width: var(--viewer-size);
+    aspect-ratio: 1;
+    transform-origin: 50% 50%;
+  }
+
+  .viewerClose {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 0.9rem);
+    left: calc(env(safe-area-inset-left, 0px) + 0.9rem);
+    z-index: 2;
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+    padding: 0;
+    border: 1px solid rgba(245, 243, 238, 0.72);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.18);
+    color: #f5f3ee;
+    cursor: pointer;
+    opacity: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .viewerClose:focus-visible {
+    outline: 2px solid #f5f3ee;
+    outline-offset: 3px;
+  }
+
+  .viewer[data-open] .viewerBackdrop,
+  .viewer[data-open] .viewerClose { opacity: 1; }
+
+  .viewer:not([data-open]) .viewerClose { pointer-events: none; }
+
+  .viewerCloseIcon {
+    position: relative;
+    display: block;
+    width: 0.9rem;
+    height: 0.9rem;
+
+    &::before,
+    &::after {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 1.35px;
+      border-radius: 1px;
+      background: currentColor;
+      content: "";
+    }
+
+    &::before { transform: translateY(-50%) rotate(45deg); }
+    &::after { transform: translateY(-50%) rotate(-45deg); }
+  }
+}
