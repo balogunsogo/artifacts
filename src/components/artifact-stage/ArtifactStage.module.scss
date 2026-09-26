@@ -124,10 +124,17 @@
 }
 
 @media (max-width: 767px) {
-  .stage[data-artifact="scroll-sequence"],
-  .stage[data-artifact="card-flip"] {
+  .stage[data-artifact="scroll-sequence"] {
     height: auto;
     min-height: 0;
+    overflow: visible;
+  }
+
+  /* Full-height like other pages so the information control pins bottom-left. */
+  .stage[data-artifact="card-flip"] {
+    height: auto;
+    min-height: calc(100svh - 6.1rem);
+    min-height: calc(100dvh - 6.1rem);
     overflow: visible;
   }
 
@@ -136,8 +143,7 @@
     inset: auto;
   }
 
-  .stage[data-artifact="scroll-sequence"] .info,
-  .stage[data-artifact="card-flip"] .info {
+  .stage[data-artifact="scroll-sequence"] .info {
     position: relative;
     right: auto;
     bottom: auto;
