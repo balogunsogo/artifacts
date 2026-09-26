@@ -9,17 +9,21 @@ import { SpatialServicesArtifact } from "@/artifacts/spatial-services/SpatialSer
 import { spatialServices } from "@/artifacts/spatial-services/spatial-services.data";
 import { ThreeImageOrbit } from "@/artifacts/three-image-orbit/ThreeImageOrbit";
 import { TrackTransitionArtifact } from "@/artifacts/track-transition/TrackTransitionArtifact";
+import { ScrollSequenceArtifact } from "@/artifacts/scroll-sequence/ScrollSequenceArtifact";
+import { CardFlipArtifact } from "@/artifacts/card-flip/CardFlipArtifact";
 import { InformationPanel } from "@/components/information-panel/InformationPanel";
 import styles from "./ArtifactStage.module.scss";
 
 export function ArtifactStage({ artifact }: { artifact: Artifact }) {
-  const isScrollCinema = artifact.slug === "scroll-cinema";
+  const isScrollArtifact = artifact.slug === "scroll-cinema" || artifact.slug === "scroll-sequence";
   const usesCardBackground = artifact.slug === "block-orbit";
   const usesPageBackground = artifact.slug === "split-menu"
     || artifact.slug === "scroll-cinema"
     || artifact.slug === "ambient-artwork"
     || artifact.slug === "spatial-services"
-    || artifact.slug === "three-image-orbit";
+    || artifact.slug === "three-image-orbit"
+    || artifact.slug === "scroll-sequence"
+    || artifact.slug === "card-flip";
   const theme = {
     "--stage-bg": usesCardBackground
       ? "var(--card-preview-bg)"
@@ -36,7 +40,7 @@ export function ArtifactStage({ artifact }: { artifact: Artifact }) {
   } as CSSProperties;
 
   return (
-    <section className={`${styles.stage} ${isScrollCinema ? styles.scrollStage : ""}`} data-artifact={artifact.slug} style={theme} aria-labelledby="artifact-title">
+    <section className={`${styles.stage} ${isScrollArtifact ? styles.scrollStage : ""}`} data-artifact={artifact.slug} style={theme} aria-labelledby="artifact-title">
       <div className={styles.visual}>
         {artifact.slug === "block-orbit" ? (
           <BlockOrbitArtifact mode="full" />
@@ -68,6 +72,10 @@ export function ArtifactStage({ artifact }: { artifact: Artifact }) {
           <SpatialServicesArtifact />
         ) : artifact.slug === "palette-shift" ? (
           <PaletteShiftArtifact mode="full" />
+        ) : artifact.slug === "scroll-sequence" ? (
+          <ScrollSequenceArtifact />
+        ) : artifact.slug === "card-flip" ? (
+          <CardFlipArtifact />
         ) : (
           <TrackTransitionArtifact mode="full" footer={<InformationPanel artifact={artifact} />} />
         )}

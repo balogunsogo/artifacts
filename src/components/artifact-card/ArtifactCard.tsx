@@ -8,6 +8,8 @@ import { SpatialServicesPreview } from "@/artifacts/spatial-services/SpatialServ
 import { TrackTransitionArtifact } from "@/artifacts/track-transition/TrackTransitionArtifact";
 import { spatialServices } from "@/artifacts/spatial-services/spatial-services.data";
 import { ThreeImageOrbit } from "@/artifacts/three-image-orbit/ThreeImageOrbit";
+import { ScrollSequencePreview } from "@/artifacts/scroll-sequence/ScrollSequencePreview";
+import { CardFlipPreview } from "@/artifacts/card-flip/CardFlipPreview";
 import { TrackedArtifactLink } from "@/components/analytics/TrackedArtifactLink";
 import styles from "./ArtifactCard.module.scss";
 
@@ -37,6 +39,10 @@ export function ArtifactCard({ artifact }: { artifact: Artifact }) {
             <SpatialServicesPreview />
           ) : artifact.slug === "palette-shift" ? (
             <PaletteShiftArtifact mode="preview" initialArtworkIndex={0} />
+          ) : artifact.slug === "scroll-sequence" ? (
+            <ScrollSequencePreview />
+          ) : artifact.slug === "card-flip" ? (
+            <CardFlipPreview />
           ) : (
             <TrackTransitionArtifact mode="preview" initialTrackIndex={0} />
           )}

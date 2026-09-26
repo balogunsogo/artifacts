@@ -1,0 +1,62 @@
+.root {
+  --sequence-ease: cubic-bezier(.2, .7, .2, 1);
+  --sequence-secondary: color-mix(in srgb, currentColor 68%, transparent);
+  --sequence-muted: color-mix(in srgb, currentColor 46%, transparent);
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(18rem, .9fr) minmax(26rem, 1.1fr);
+  gap: clamp(3rem, 8vw, 10rem);
+  width: 100%;
+  padding: clamp(4rem, 7vw, 8rem) clamp(2rem, 6vw, 7rem);
+  background: var(--color-page);
+  color: var(--color-text);
+}
+
+.stickyPanel {
+  position: sticky;
+  top: 6rem;
+  align-self: start;
+  height: calc(100vh - 12rem);
+  min-height: 30rem;
+  padding-top: clamp(2rem, 7vh, 5rem);
+}
+
+.numberWindow { height: 1em; overflow: hidden; font-family: var(--font-syne), sans-serif; font-size: clamp(8rem, 18vw, 18rem); font-weight: 700; letter-spacing: -.095em; line-height: 1; }
+.numberRoll { transition: transform .8s var(--sequence-ease); }
+.numberRoll span { display: block; height: 1em; line-height: 1; }
+.titleWindow { position: relative; height: 3.4rem; margin-top: 1rem; overflow: hidden; }
+.titleWindow p { position: absolute; inset: 0; margin: 0; font-family: var(--font-syne), sans-serif; font-size: clamp(1.65rem, 2.4vw, 2.6rem); font-weight: 650; letter-spacing: -.045em; line-height: 1.1; opacity: 0; transform: translateY(110%); transition: opacity .55s var(--sequence-ease), transform .65s var(--sequence-ease); }
+.titleWindow p[data-state="active"] { opacity: 1; transform: translateY(0); }
+.titleWindow p[data-state="past"] { transform: translateY(-110%); }
+.segments { display: grid; grid-template-columns: repeat(5, 1fr); gap: .45rem; width: min(28rem, 100%); margin-top: 1.25rem; }
+.segments span { height: 2px; background: var(--color-border); transition: background-color .65s var(--sequence-ease); }
+.segments span[data-filled="true"] { background: var(--color-text); }
+.meta { margin-top: 1rem; color: var(--sequence-muted); font-size: var(--text-xs); letter-spacing: .1em; text-transform: uppercase; }
+
+.steps { min-width: 0; }
+.step { position: relative; display: flex; min-height: 82vh; flex-direction: column; justify-content: center; border-top: 1px solid var(--color-border); opacity: .3; transition: opacity .6s var(--sequence-ease); }
+.step:last-child { border-bottom: 1px solid var(--color-border); }
+.step[data-state="past"] { opacity: .48; }
+.step[data-state="active"] { opacity: 1; }
+.stepMeta { display: flex; justify-content: space-between; margin-bottom: clamp(2rem, 5vh, 4rem); color: var(--sequence-muted); font-size: var(--text-xs); letter-spacing: .09em; text-transform: uppercase; }
+.step h2 { max-width: 10ch; margin: 0; font-family: var(--font-syne), sans-serif; font-size: clamp(3rem, 5.7vw, 6.6rem); font-weight: 600; letter-spacing: -.065em; line-height: .93; }
+.step > p { max-width: 32rem; margin-top: 1.5rem; color: var(--sequence-secondary); font-size: clamp(1rem, 1.4vw, 1.25rem); line-height: 1.45; }
+.dot, .timeline { display: none; }
+
+@media (max-width: 991px) {
+  .root { display: block; padding: 2rem max(1.5rem, 6vw) 5rem; }
+  .stickyPanel { display: none; }
+  .steps { padding-left: 2.75rem; }
+  .step { min-height: clamp(22rem, 55vh, 34rem); padding: 4.5rem 0; border: 0; }
+  .stepMeta { margin-bottom: 1.25rem; }
+  .step h2 { max-width: 13ch; font-size: clamp(2.4rem, 10vw, 4.25rem); }
+  .step > p { margin-top: 1rem; font-size: 1rem; }
+  .dot { position: absolute; top: 50%; left: -2.75rem; display: block; width: .72rem; height: .72rem; border: 1px solid var(--sequence-muted); background: var(--color-page); transform: translate(-50%, -50%); transition: background-color .5s var(--sequence-ease), border-color .5s var(--sequence-ease); }
+  .step[data-state="past"] .dot, .step[data-state="active"] .dot { border-color: var(--color-text); background: var(--color-text); }
+  .timeline { position: absolute; z-index: 0; top: var(--timeline-top); left: max(1.5rem, 6vw); display: block; width: 1px; height: var(--timeline-height); background: var(--color-border); }
+  .timeline span { display: block; width: 100%; height: 100%; background: var(--color-text); transform: scaleY(var(--timeline-progress)); transform-origin: top; transition: transform .65s var(--sequence-ease); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .numberRoll, .titleWindow p, .segments span, .step, .dot, .timeline span { transition: none; }
+}

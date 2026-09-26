@@ -1,0 +1,18 @@
+.preview { --preview-ease: cubic-bezier(.2, .7, .2, 1); display: grid; grid-template-columns: .9fr 1.1fr; gap: 9%; align-items: center; width: 100%; height: 100%; padding: 11%; overflow: hidden; background: var(--card-preview-bg); color: var(--color-text); }
+.numberWindow { height: 1em; overflow: hidden; font-family: var(--font-syne), sans-serif; font-size: clamp(4.2rem, 8vw, 7.2rem); font-weight: 700; letter-spacing: -.1em; line-height: 1; }
+.numberRoll { transition: transform .8s var(--preview-ease); }
+.numberRoll span { display: block; height: 1em; line-height: 1; }
+.titleWindow { position: relative; height: 1.5rem; margin-top: .65rem; overflow: hidden; }
+.titleWindow b { position: absolute; inset: 0; font-family: var(--font-syne), sans-serif; font-size: clamp(.75rem, 1.5vw, 1.1rem); letter-spacing: -.04em; opacity: 0; transform: translateY(110%); transition: opacity .5s var(--preview-ease), transform .6s var(--preview-ease); }
+.titleWindow b[data-state="active"] { opacity: 1; transform: translateY(0); }
+.titleWindow b[data-state="past"] { transform: translateY(-110%); }
+.segments { display: grid; grid-template-columns: repeat(5, 1fr); gap: .2rem; margin-top: .6rem; }
+.segments i { height: 2px; background: var(--color-border); transition: background-color .55s var(--preview-ease); }
+.segments i[data-filled="true"] { background: var(--color-text); }
+.stepList { display: grid; }
+.stepList span { display: grid; grid-template-columns: 1.4rem 1fr; gap: .35rem; padding: .5rem 0; border-top: 1px solid var(--color-border); font-family: var(--font-syne), sans-serif; font-size: clamp(.55rem, 1vw, .82rem); letter-spacing: -.025em; opacity: .2; transform: translateX(0); transition: opacity .6s var(--preview-ease), transform .6s var(--preview-ease); }
+.stepList span:last-child { border-bottom: 1px solid var(--color-border); }
+.stepList span[data-state="past"] { opacity: .48; }
+.stepList span[data-state="active"] { opacity: 1; transform: translateX(.25rem); }
+.stepList small { font-family: var(--font-inter-tight), sans-serif; font-size: .48rem; font-weight: 500; letter-spacing: .05em; }
+@media (prefers-reduced-motion: reduce) { .numberRoll, .titleWindow b, .segments i, .stepList span { transition: none; } }

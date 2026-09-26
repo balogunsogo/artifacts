@@ -13,6 +13,17 @@
   --information-fg: var(--color-text);
 }
 
+.stage[data-artifact="scroll-sequence"] {
+  overflow: visible;
+  isolation: auto;
+
+  .visual { position: relative; inset: auto; }
+}
+
+.stage[data-artifact="card-flip"] {
+  min-height: calc(100dvh - 5.5rem);
+}
+
 /* Dark-background artifacts */
 .stage[data-artifact="ambient-artwork"],
 .stage[data-artifact="palette-shift"],
@@ -113,6 +124,27 @@
 }
 
 @media (max-width: 767px) {
+  .stage[data-artifact="scroll-sequence"],
+  .stage[data-artifact="card-flip"] {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .stage[data-artifact="card-flip"] .visual {
+    position: relative;
+    inset: auto;
+  }
+
+  .stage[data-artifact="scroll-sequence"] .info,
+  .stage[data-artifact="card-flip"] .info {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    padding: 0 max(var(--space-3), env(safe-area-inset-right)) max(var(--space-3), env(safe-area-inset-bottom)) max(var(--space-3), env(safe-area-inset-left));
+  }
+
   .stage[data-artifact="spatial-services"] {
     height: auto;
     min-height: 0;
