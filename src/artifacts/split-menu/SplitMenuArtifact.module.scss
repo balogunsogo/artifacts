@@ -17,13 +17,19 @@
   min-height: inherit;
 }
 
-.decorativeMark {
+// Matches .openButton's type and box so both sit on the same line.
+.prompt {
   position: absolute;
-  top: 2.15rem;
+  top: 1.35rem;
   left: 2.15rem;
-  width: clamp(4.5rem, 8vw, 6rem);
-  height: 0.9rem;
-  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: 0.65rem 0;
+  font-size: var(--text-base);
+  font-weight: 500;
+  text-transform: uppercase;
 }
 
 .featureFrame {
@@ -32,11 +38,20 @@
   left: 50%;
   width: min(64%, 42rem);
   aspect-ratio: 16 / 9;
+  overflow: hidden;
   background: var(--color-surface);
   transform: translate(-50%, -50%);
+
+  img {
+    object-fit: cover;
+    animation: feature-in 480ms ease both;
+  }
 }
 
-.mobileTeaser { display: none; }
+@keyframes feature-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
 .openButton,
 .closeButton {
@@ -288,25 +303,19 @@
     align-content: center;
     padding: 4.75rem 1rem 6rem;
   }
-  .decorativeMark { top: 1.35rem; left: 1rem; width: 3.5rem; height: 0.7rem; }
+  .prompt { top: 0.65rem; left: 1rem; }
   .openButton { top: 0.65rem; right: 1rem; min-width: 2.75rem; justify-content: flex-end; }
-  .featureFrame { display: none; }
-  .mobileTeaser {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.35rem;
+  // Single image across the width the four teaser cards used to span, taller on mobile.
+  .featureFrame {
+    position: relative;
+    top: auto;
+    left: auto;
+    display: block;
     width: 100%;
     max-width: 32rem;
+    aspect-ratio: 4 / 5;
     margin-inline: auto;
-  }
-  .mobileTeaserCard {
-    position: relative;
-    display: block;
-    aspect-ratio: 0.72;
-    overflow: hidden;
-    background: var(--color-surface);
-
-    img { object-fit: cover; }
+    transform: none;
   }
 
   .dialogContent { padding: 0; }
@@ -376,4 +385,5 @@
   .card,
   .label,
   .imageWrap img { transition: none !important; }
+  .featureFrame img { animation: none; }
 }

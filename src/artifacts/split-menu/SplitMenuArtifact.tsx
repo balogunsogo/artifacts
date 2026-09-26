@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { spatialServices } from "@/artifacts/spatial-services/spatial-services.data";
@@ -36,6 +36,16 @@ export function SplitMenuArtifact({
   const imageRefs = useRef<HTMLImageElement[]>([]);
   const openMenuRef = useRef<() => void>(() => undefined);
   const closeMenuRef = useRef<() => void>(() => undefined);
+  const [featureItem, setFeatureItem] = useState<(typeof menuItems)[number] | null>(null);
+
+  // Picked after mount so server and client markup match; a new image on every visit.
+  useEffect(() => {
+    if (mode !== "full") return;
+    const frame = window.requestAnimationFrame(() => {
+      setFeatureItem(menuItems[Math.floor(Math.random() * menuItems.length)]);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [mode]);
 
   useGSAP(() => {
     const root = rootRef.current;
@@ -402,15 +412,18 @@ export function SplitMenuArtifact({
       ) : (
         <>
           <div className={styles.closedStage}>
-            <span className={styles.decorativeMark} aria-hidden="true" />
-            <span className={styles.featureFrame} aria-hidden="true" />
-            <div className={styles.mobileTeaser} aria-hidden="true">
-              {menuItems.map((item) => (
-                <span key={item.label} className={styles.mobileTeaserCard}>
-                  <Image src={item.image} alt="" fill sizes="22vw" />
-                </span>
-              ))}
-            </div>
+            <p className={styles.prompt}>Click on the menu</p>
+            <span className={styles.featureFrame} aria-hidden="true">
+              {featureItem && (
+                <Image
+                  src={featureItem.image}
+                  alt=""
+                  fill
+                  sizes="(max-width: 700px) 100vw, 64vw"
+                  style={{ objectPosition: featureItem.objectPosition }}
+                />
+              )}
+            </span>
             <button
               ref={triggerRef}
               className={styles.openButton}

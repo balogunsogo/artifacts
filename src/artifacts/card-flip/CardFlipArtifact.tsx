@@ -33,7 +33,7 @@ function FlipCard({ card, index }: { card: SpatialService; index: number }) {
         </div>
       </div>
       <div className={styles.caption}>
-        <div><h2>{card.label}</h2><p>Spatial study</p></div>
+        <h2>{card.label}</h2>
         <button type="button" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen((value) => !value)}>
           {open ? "Close" : "Details"}<span aria-hidden="true">{open ? "−" : "+"}</span>
         </button>

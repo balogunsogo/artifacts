@@ -1,3 +1,15 @@
+// Simulated pointer orbiting the artwork clockwise (top → right → bottom → left).
+// Mirrors the artifact's pointer mapping: a pointer at the top tilts rotateX
+// positive, at the right tilts rotateY positive — so tilt-x follows cos and
+// tilt-y follows sin of the orbit angle.
+@property --orbit {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+
+$tilt: 4.2deg;
+
 .preview {
   display: grid;
   width: 100%;
@@ -5,44 +17,75 @@
   place-items: center;
   overflow: hidden;
   background: var(--card-preview-bg, #d8d2c7);
-  perspective: 900px;
 }
 
 .stage {
   position: relative;
   width: min(60%, 13rem);
   aspect-ratio: 1;
-  transform: rotateX(-1.5deg) rotateY(-2deg);
-  animation: artwork-drift 14s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
-  animation-play-state: paused;
-  transform-style: preserve-3d;
-  will-change: transform;
+  perspective: 900px;
 }
 
-.preview[data-motion="running"] .stage { animation-play-state: running; }
-
 .artwork {
+  --tilt-x: calc(cos(var(--orbit)) * #{$tilt});
+  --tilt-y: calc(sin(var(--orbit)) * #{$tilt});
+
   position: absolute;
   inset: 0;
   overflow: hidden;
-  box-shadow: 0.2rem 1.2rem 2.8rem rgba(20, 18, 14, 0.28);
+  border-radius: 3px;
+  background: #171816;
+  box-shadow: calc(sin(var(--orbit)) * -4.8px) 1.2rem 2.8rem rgba(20, 18, 14, 0.3);
+  transform:
+    translate3d(0, -3.5px, 0)
+    rotateX(var(--tilt-x))
+    rotateY(var(--tilt-y));
+  transform-style: preserve-3d;
+  animation: orbit 3s linear infinite;
+  animation-play-state: paused;
+  will-change: transform;
 }
 
-.artwork img { object-fit: cover; }
+.preview[data-motion="running"] .artwork { animation-play-state: running; }
+
+.image {
+  z-index: 1;
+  object-fit: cover;
+  animation: artwork-in 480ms ease both;
+}
 
 .reflection {
   position: absolute;
-  inset: -40% -65%;
-  background: linear-gradient(108deg, transparent 42%, rgba(255, 255, 255, 0.17) 50%, transparent 58%);
-  transform: translateX(-18%) rotate(5deg);
+  inset: -35% -65%;
+  z-index: 2;
+  background: linear-gradient(
+    108deg,
+    transparent 34%,
+    rgba(255, 255, 255, 0.03) 43%,
+    rgba(255, 255, 255, 0.2) 49%,
+    rgba(255, 255, 255, 0.035) 55%,
+    transparent 64%
+  );
+  opacity: 0.18;
+  transform: translate3d(calc(sin(var(--orbit)) * 34%), 0, 26px);
   pointer-events: none;
 }
 
-@keyframes artwork-drift {
-  from { transform: translate3d(-1.5%, 1%, 0) rotateX(-2deg) rotateY(-3deg); }
-  to { transform: translate3d(1.5%, -1%, 0) rotateX(2deg) rotateY(3deg); }
+@keyframes orbit {
+  to { --orbit: 360deg; }
+}
+
+@keyframes artwork-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stage { animation: none; transform: rotateX(-1deg) rotateY(2deg); will-change: auto; }
+  .artwork {
+    animation: none;
+    --orbit: 45deg;
+    will-change: auto;
+  }
+
+  .image { animation: none; }
 }
