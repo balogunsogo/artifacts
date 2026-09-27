@@ -58,7 +58,11 @@ export function BlockOrbitPreview() {
                 fill
                 draggable={false}
                 sizes="(max-width: 900px) 38vw, 12rem"
-                loading={index === 0 ? "eager" : "lazy"}
+                // First card on the index and its LCP element: preload the front face at high
+                // priority; the other faces are ~1.6 KB SVGs, so load them eagerly too.
+                preload={index === 0}
+                fetchPriority={index === 0 ? "high" : "auto"}
+                loading="eager"
               />
             </span>
           ))}

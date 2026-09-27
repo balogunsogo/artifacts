@@ -3,8 +3,10 @@
 import { useEffect, useRef } from "react";
 import styles from "./ScrollCinemaPreview.module.scss";
 
+// 6 s, 960×540, silent loop cut from the full 4K clip (~290 KB vs ~10 MB).
+// The full clip is only loaded on the artifact page.
 const VIDEO_SRC =
-  "/artifacts/scroll-cinema/sound-producer-trimmed.mp4";
+  "/artifacts/scroll-cinema/sound-producer-preview.mp4";
 
 export function ScrollCinemaPreview() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -21,6 +23,17 @@ export function ScrollCinemaPreview() {
     );
 
     let visible = false;
+    let sourceAttached = false;
+
+    // The clip stays off the critical path: it is attached once the card
+    // nears the viewport, or when the browser is idle after load — whichever is first.
+    const attachSource = () => {
+      if (sourceAttached) return;
+      sourceAttached = true;
+      video.preload = "metadata";
+      video.src = VIDEO_SRC;
+      syncMotion();
+    };
 
     const syncMotion = () => {
       const running =
@@ -32,7 +45,7 @@ export function ScrollCinemaPreview() {
         ? "running"
         : "paused";
 
-      if (running) {
+      if (running && sourceAttached) {
         video.play().catch(() => undefined);
       } else {
         video.pause();
@@ -54,6 +67,27 @@ export function ScrollCinemaPreview() {
 
     observer.observe(root);
 
+    const loader = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) attachSource();
+      },
+      {
+        rootMargin: "50%",
+      }
+    );
+
+    loader.observe(root);
+
+    let idleHandle: number | null = null;
+    const scheduleIdleAttach = () => {
+      idleHandle = typeof window.requestIdleCallback === "function"
+        ? window.requestIdleCallback(attachSource, { timeout: 4000 })
+        : window.setTimeout(attachSource, 2000);
+    };
+
+    if (document.readyState === "complete") scheduleIdleAttach();
+    else window.addEventListener("load", scheduleIdleAttach, { once: true });
+
     document.addEventListener(
       "visibilitychange",
       syncMotion
@@ -68,6 +102,12 @@ export function ScrollCinemaPreview() {
 
     return () => {
       observer.disconnect();
+      loader.disconnect();
+      window.removeEventListener("load", scheduleIdleAttach);
+      if (idleHandle !== null) {
+        if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(idleHandle);
+        else window.clearTimeout(idleHandle);
+      }
 
       document.removeEventListener(
         "visibilitychange",
@@ -93,11 +133,10 @@ export function ScrollCinemaPreview() {
       <div className={styles.frame}>
         <video
           ref={videoRef}
-          src={VIDEO_SRC}
           muted
           loop
           playsInline
-          preload="metadata"
+          preload="none"
           controls={false}
         />
       </div>

@@ -63,7 +63,6 @@ export function AmbientArtworkPreview() {
               fill
               sizes="(max-width: 900px) 54vw, 13rem"
               loading="lazy"
-              unoptimized
             />
           )}
           <span className={styles.reflection} />

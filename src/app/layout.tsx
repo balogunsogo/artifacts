@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter_Tight, Syne } from "next/font/google";
-import { GoogleAnalytics } from "@next/third-parties/google";
+import Script from "next/script";
 import {
   siteDescription,
   siteTitle,
@@ -25,6 +25,17 @@ const themeInitializationScript = `
       document.documentElement.style.colorScheme = theme;
     }
   })();
+`;
+
+const gaId = "G-ZXV390DW0Q";
+
+// Queue is set up right after hydration so early events (sendGAEvent) are kept;
+// the 170 KiB gtag.js itself waits until the page has finished loading.
+const analyticsInitializationScript = `
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag("js", new Date());
+  gtag("config", "${gaId}");
 `;
 
 const interTight = Inter_Tight({
@@ -73,10 +84,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body>
         {children}
+        {process.env.NODE_ENV === "production" && (
+          <>
+            <Script id="ga-init" strategy="afterInteractive">{analyticsInitializationScript}</Script>
+            <Script src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="lazyOnload" />
+          </>
+        )}
       </body>
-      {process.env.NODE_ENV === "production" && (
-        <GoogleAnalytics gaId="G-ZXV390DW0Q" />
-      )}
     </html>
   );
 }
