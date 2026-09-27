@@ -88,3 +88,14 @@ export const TRACK_TRANSITION_TRACKS = [
   ARCHIVE_TRACKS[6],
   ARCHIVE_TRACKS[7],
 ] as const;
+
+// Homepage previews show covers at ~12rem, and palettes are sampled at 32px, so they use
+// 640px copies in /music-covers/preview/ instead of the 1200px originals.
+export function previewArtworkSrc(src: string): string {
+  return src.endsWith(".jpg") ? src.replace("/music-covers/", "/music-covers/preview/") : src;
+}
+
+export const TRACK_TRANSITION_PREVIEW_TRACKS = TRACK_TRANSITION_TRACKS.map((track) => ({
+  ...track,
+  artworkSrc: previewArtworkSrc(track.artworkSrc),
+}));

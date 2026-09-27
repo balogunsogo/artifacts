@@ -111,24 +111,32 @@ $ease-drop: cubic-bezier(0.55, 0, 1, 0.45);
   right: 6%;
   bottom: 10%;
   left: 6%;
-  display: flex;
-  align-items: flex-end;
-  gap: 0.4rem;
+  container-type: inline-size;
 }
 
-// Square boxes: height follows width, so growing and shrinking stay proportional.
-// Row totals 4 units — the active box takes 1.5, the other three share 2.5.
+// Square boxes laid out and resized with transforms (geometry set inline from
+// SplitMenuPreview.tsx). Scaling from the bottom-left keeps them bottom-aligned and
+// grows height and width equally.
 .slot {
-  position: relative;
+  position: absolute;
+  bottom: 0;
+  left: 0;
   display: block;
-  min-width: 0;
-  flex: 1 1 0;
+  width: calc(100% / var(--row-units));
   aspect-ratio: 1;
-  transition: flex-grow 420ms $ease-layout;
+  transform-origin: 0 100%;
+  transition: transform 420ms $ease-layout;
 }
 
-.slot[data-active="true"] { flex-grow: 1.5; }
-.slot[data-muted="true"] { flex-grow: calc(2.5 / 3); }
+.labelAnchor {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: calc(100% / var(--row-units));
+  height: 0;
+  transition: transform 420ms $ease-layout;
+  pointer-events: none;
+}
 
 .rise {
   position: relative;
@@ -162,8 +170,8 @@ $ease-drop: cubic-bezier(0.55, 0, 1, 0.45);
 
 .label {
   position: absolute;
-  bottom: calc(100% + 0.35rem);
-  left: 50%;
+  bottom: 0.35rem;
+  left: 0;
   font-size: 0.5rem;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -175,7 +183,7 @@ $ease-drop: cubic-bezier(0.55, 0, 1, 0.45);
   transition: opacity 180ms ease, transform 180ms ease;
 }
 
-.slot[data-active="true"] .label {
+.labelAnchor[data-active="true"] .label {
   opacity: 1;
   transform: translate(-50%, 0);
 }

@@ -1,14 +1,34 @@
+@use "sass:math";
+
 // Simulated pointer orbiting the artwork clockwise (top → right → bottom → left).
 // Mirrors the artifact's pointer mapping: a pointer at the top tilts rotateX
 // positive, at the right tilts rotateY positive — so tilt-x follows cos and
 // tilt-y follows sin of the orbit angle.
-@property --orbit {
-  syntax: "<angle>";
-  inherits: true;
-  initial-value: 0deg;
+//
+// The circle is baked into transform-only keyframes (24 steps, linear between them)
+// so the whole orbit runs on the compositor instead of recalculating styles each frame.
+
+$tilt: 4.2;           // deg
+$lift: -3.5px;
+$shadow-shift: -4.8;  // px, follows sin
+$reflection-shift: 34; // %, follows sin
+$steps: 24;
+
+@function artwork-transform($angle) {
+  @return translate3d(0, $lift, 0)
+    rotateX(math.cos($angle) * $tilt * 1deg)
+    rotateY(math.sin($angle) * $tilt * 1deg);
 }
 
-$tilt: 4.2deg;
+@function shadow-transform($angle) {
+  @return translate3d(math.sin($angle) * $shadow-shift * 1px, $lift, 0)
+    rotateX(math.cos($angle) * $tilt * 1deg)
+    rotateY(math.sin($angle) * $tilt * 1deg);
+}
+
+@function reflection-transform($angle) {
+  @return translate3d(math.sin($angle) * $reflection-shift * 1%, 0, 26px);
+}
 
 .preview {
   display: grid;
@@ -26,27 +46,37 @@ $tilt: 4.2deg;
   perspective: 900px;
 }
 
-.artwork {
-  --tilt-x: calc(cos(var(--orbit)) * #{$tilt});
-  --tilt-y: calc(sin(var(--orbit)) * #{$tilt});
+// Shadow lives on its own layer so its sideways drift is a transform too.
+.stage::before {
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  box-shadow: 0 1.2rem 2.8rem rgba(20, 18, 14, 0.3);
+  transform: shadow-transform(0deg);
+  animation: orbit-shadow 3s linear infinite;
+  animation-play-state: paused;
+  content: "";
+  will-change: transform;
+}
 
+.artwork {
   position: absolute;
   inset: 0;
   overflow: hidden;
   border-radius: 3px;
   background: #171816;
-  box-shadow: calc(sin(var(--orbit)) * -4.8px) 1.2rem 2.8rem rgba(20, 18, 14, 0.3);
-  transform:
-    translate3d(0, -3.5px, 0)
-    rotateX(var(--tilt-x))
-    rotateY(var(--tilt-y));
+  transform: artwork-transform(0deg);
   transform-style: preserve-3d;
-  animation: orbit 3s linear infinite;
+  animation: orbit-artwork 3s linear infinite;
   animation-play-state: paused;
   will-change: transform;
 }
 
-.preview[data-motion="running"] .artwork { animation-play-state: running; }
+.preview[data-motion="running"] {
+  .stage::before,
+  .artwork,
+  .reflection { animation-play-state: running; }
+}
 
 .image {
   z-index: 1;
@@ -67,12 +97,28 @@ $tilt: 4.2deg;
     transparent 64%
   );
   opacity: 0.18;
-  transform: translate3d(calc(sin(var(--orbit)) * 34%), 0, 26px);
+  transform: reflection-transform(0deg);
+  animation: orbit-reflection 3s linear infinite;
+  animation-play-state: paused;
   pointer-events: none;
 }
 
-@keyframes orbit {
-  to { --orbit: 360deg; }
+@keyframes orbit-artwork {
+  @for $i from 0 through $steps {
+    #{math.percentage(math.div($i, $steps))} { transform: artwork-transform(math.div(360deg * $i, $steps)); }
+  }
+}
+
+@keyframes orbit-shadow {
+  @for $i from 0 through $steps {
+    #{math.percentage(math.div($i, $steps))} { transform: shadow-transform(math.div(360deg * $i, $steps)); }
+  }
+}
+
+@keyframes orbit-reflection {
+  @for $i from 0 through $steps {
+    #{math.percentage(math.div($i, $steps))} { transform: reflection-transform(math.div(360deg * $i, $steps)); }
+  }
 }
 
 @keyframes artwork-in {
@@ -81,11 +127,8 @@ $tilt: 4.2deg;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .artwork {
-    animation: none;
-    --orbit: 45deg;
-    will-change: auto;
-  }
-
+  .stage::before { animation: none; transform: shadow-transform(45deg); will-change: auto; }
+  .artwork { animation: none; transform: artwork-transform(45deg); will-change: auto; }
+  .reflection { animation: none; transform: reflection-transform(45deg); }
   .image { animation: none; }
 }

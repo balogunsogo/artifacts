@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { ARCHIVE_TRACKS, TRACK_TRANSITION_TRACKS } from "@/artifacts/_shared/music/tracks";
+import { ARCHIVE_TRACKS, TRACK_TRANSITION_PREVIEW_TRACKS } from "@/artifacts/_shared/music/tracks";
 import {
   DEFAULT_PALETTE,
   loadArtworkPalette,
@@ -10,6 +10,7 @@ import {
   rgbToCss,
   type ArtworkPalette,
 } from "@/artifacts/_shared/music/palette";
+import { deferUntilNeeded } from "@/artifacts/_shared/defer-until-needed";
 import styles from "./TrackTransitionArtifact.module.scss";
 
 export type TrackTransitionArtifactProps = {
@@ -50,7 +51,7 @@ export function TrackTransitionArtifact({
   autoCycle,
   footer,
 }: TrackTransitionArtifactProps) {
-  const demoTracks = mode === "full" ? ARCHIVE_TRACKS : TRACK_TRANSITION_TRACKS;
+  const demoTracks = mode === "full" ? ARCHIVE_TRACKS : TRACK_TRANSITION_PREVIEW_TRACKS;
   const startingIndex = wrapIndex(Math.round(initialTrackIndex), demoTracks.length);
   const rootRef = useRef<HTMLDivElement>(null);
   const requestTrackRef = useRef<(index: number) => void>(() => undefined);
@@ -238,13 +239,18 @@ export function TrackTransitionArtifact({
     document.addEventListener("visibilitychange", onVisibilityChange);
     reducedMotion.addEventListener("change", onReducedMotionChange);
     syncCycle();
-    void prepareTrack(startingIndex, false);
+    // Previews sit below the fold on mobile: fetch the first cover when it's needed.
+    const cancelInitialPrepare = mode === "preview"
+      ? deferUntilNeeded(root, () => void prepareTrack(startingIndex, false))
+      : null;
+    if (!cancelInitialPrepare) void prepareTrack(startingIndex, false);
 
     return () => {
       mounted = false;
       generation += 1;
       controller?.abort();
       observer?.disconnect();
+      cancelInitialPrepare?.();
       clearCycle();
       if (midpointTimer !== null) window.clearTimeout(midpointTimer);
       if (cleanupTimer !== null) window.clearTimeout(cleanupTimer);

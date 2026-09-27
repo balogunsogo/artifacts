@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { PALETTE_SHIFT_TRACKS } from "@/artifacts/_shared/music/tracks";
+import { PALETTE_SHIFT_TRACKS, previewArtworkSrc } from "@/artifacts/_shared/music/tracks";
 import {
   DEFAULT_PALETTE,
   loadArtworkPalette,
@@ -10,6 +10,7 @@ import {
   rgbToCss,
   type ArtworkPalette,
 } from "@/artifacts/_shared/music/palette";
+import { deferUntilNeeded } from "@/artifacts/_shared/defer-until-needed";
 import styles from "./PaletteShiftArtifact.module.scss";
 
 export type PaletteShiftArtifactProps = {
@@ -25,6 +26,7 @@ type BufferState = {
 };
 
 const artworkSources = PALETTE_SHIFT_TRACKS.map((track) => track.artworkSrc);
+const previewArtworkSources = artworkSources.map(previewArtworkSrc);
 
 const normalizeIndex = (index: number) => Math.max(0, Math.min(artworkSources.length - 1, Math.round(index)));
 const emptyBuffer = (): BufferState => ({ source: null, palette: DEFAULT_PALETTE });
@@ -49,10 +51,11 @@ export function PaletteShiftArtifact({
   autoCycle,
 }: PaletteShiftArtifactProps) {
   const startingIndex = normalizeIndex(initialArtworkIndex);
+  const sources = mode === "preview" ? previewArtworkSources : artworkSources;
   const rootRef = useRef<HTMLDivElement>(null);
   const selectArtworkRef = useRef<(index: number) => void>(() => undefined);
   const [buffers, setBuffers] = useState<[BufferState, BufferState]>(() => [
-    { source: artworkSources[startingIndex], palette: DEFAULT_PALETTE },
+    { source: sources[startingIndex], palette: DEFAULT_PALETTE },
     emptyBuffer(),
   ]);
   const [activeBuffer, setActiveBuffer] = useState<0 | 1>(0);
@@ -101,7 +104,7 @@ export function PaletteShiftArtifact({
       root.dataset.motion = canAnimate ? "running" : "paused";
       if (!canCycle) return;
       cycleTimer = window.setInterval(() => {
-        selectArtworkRef.current((currentIndex + 1) % artworkSources.length);
+        selectArtworkRef.current((currentIndex + 1) % sources.length);
       }, 5000);
     };
 
@@ -115,14 +118,14 @@ export function PaletteShiftArtifact({
       if (mounted) setIsPreparing(true);
 
       try {
-        const prepared = await loadArtworkPalette(artworkSources[nextIndex], { signal: controller.signal });
+        const prepared = await loadArtworkPalette(sources[nextIndex], { signal: controller.signal });
         if (!mounted || nextGeneration !== generation) return;
 
         if (!animate || reducedMotion.matches) {
           const slot = currentBuffer;
           setBuffers((current) => {
             const next = [...current] as [BufferState, BufferState];
-            next[slot] = { source: artworkSources[nextIndex], palette: prepared.palette };
+            next[slot] = { source: sources[nextIndex], palette: prepared.palette };
             next[slot === 0 ? 1 : 0] = emptyBuffer();
             return next;
           });
@@ -138,7 +141,7 @@ export function PaletteShiftArtifact({
         const outgoingBuffer = currentBuffer;
         setBuffers((current) => {
           const next = [...current] as [BufferState, BufferState];
-          next[incomingBuffer] = { source: artworkSources[nextIndex], palette: prepared.palette };
+          next[incomingBuffer] = { source: sources[nextIndex], palette: prepared.palette };
           return next;
         });
 
@@ -201,20 +204,25 @@ export function PaletteShiftArtifact({
     document.addEventListener("visibilitychange", onVisibilityChange);
     reducedMotion.addEventListener("change", onReducedMotionChange);
     syncCycle();
-    void prepareArtwork(startingIndex, false);
+    // Previews sit below the fold on mobile: fetch the first cover when it's needed.
+    const cancelInitialPrepare = mode === "preview"
+      ? deferUntilNeeded(root, () => void prepareArtwork(startingIndex, false))
+      : null;
+    if (!cancelInitialPrepare) void prepareArtwork(startingIndex, false);
 
     return () => {
       mounted = false;
       generation += 1;
       controller?.abort();
       observer?.disconnect();
+      cancelInitialPrepare?.();
       clearCycle();
       clearTransitionWork();
       document.removeEventListener("visibilitychange", onVisibilityChange);
       reducedMotion.removeEventListener("change", onReducedMotionChange);
       selectArtworkRef.current = () => undefined;
     };
-  }, [mode, shouldAutoCycle, startingIndex]);
+  }, [mode, shouldAutoCycle, sources, startingIndex]);
 
   const foreground = useMemo(() => readableForeground(palette.base), [palette]);
   const rootStyle = {

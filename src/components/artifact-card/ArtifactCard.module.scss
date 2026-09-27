@@ -19,6 +19,9 @@
   position: relative;
   aspect-ratio: 1;
   overflow: hidden;
+  // Off-screen previews skip style, layout and paint (blurs and animations included)
+  // until they near the viewport. The box already clips, and aspect-ratio keeps its size.
+  content-visibility: auto;
   background: var(--card-preview-bg);
 }
 
