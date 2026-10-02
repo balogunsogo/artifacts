@@ -1,7 +1,7 @@
 .root {
   --sequence-ease: cubic-bezier(.2, .7, .2, 1);
-  --sequence-secondary: color-mix(in srgb, currentColor 68%, transparent);
-  --sequence-muted: color-mix(in srgb, currentColor 46%, transparent);
+  --sequence-secondary: var(--color-text-secondary);
+  --sequence-muted: var(--color-text-muted);
   position: relative;
   display: grid;
   grid-template-columns: minmax(18rem, .9fr) minmax(26rem, 1.1fr);
@@ -34,10 +34,10 @@
 .meta { margin-top: 1rem; color: var(--sequence-muted); font-size: var(--text-xs); letter-spacing: .1em; text-transform: uppercase; }
 
 .steps { min-width: 0; }
-.step { position: relative; display: flex; min-height: 82vh; flex-direction: column; justify-content: center; border-top: 1px solid var(--color-border); opacity: .3; transition: opacity .6s var(--sequence-ease); }
+.step { position: relative; display: flex; min-height: 82vh; flex-direction: column; justify-content: center; border-top: 1px solid var(--color-border); color: var(--color-text-muted); transition: color .6s var(--sequence-ease); }
 .step:last-child { border-bottom: 1px solid var(--color-border); }
-.step[data-state="past"] { opacity: .48; }
-.step[data-state="active"] { opacity: 1; }
+.step[data-state="past"] { color: var(--color-text-muted); }
+.step[data-state="active"] { color: var(--color-text); }
 .stepMeta { display: flex; justify-content: space-between; margin-bottom: clamp(2rem, 5vh, 4rem); color: var(--sequence-muted); font-size: var(--text-xs); letter-spacing: .09em; text-transform: uppercase; }
 .step h2 { max-width: 10ch; margin: 0; font-family: var(--font-syne), sans-serif; font-size: clamp(3rem, 5.7vw, 6.6rem); font-weight: 600; letter-spacing: -.065em; line-height: .93; }
 .step > p { max-width: 32rem; margin-top: 1.5rem; color: var(--sequence-secondary); font-size: clamp(1rem, 1.4vw, 1.25rem); line-height: 1.45; }

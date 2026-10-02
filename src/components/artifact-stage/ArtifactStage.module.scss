@@ -25,7 +25,6 @@
 }
 
 /* Dark-background artifacts */
-.stage[data-artifact="ambient-artwork"],
 .stage[data-artifact="palette-shift"],
 .stage[data-artifact="track-transition"] {
   --information-fg: #fff;
@@ -58,7 +57,11 @@
   position: absolute;
   inset: 0;
   --color-text-secondary: #4f4d47;
-  --color-text-muted: #817d74;
+  --color-text-muted: #6c6861;
+}
+:global(html[data-theme="dark"]) .visual {
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
 }
 .visual > div { background: var(--stage-bg); }
 .pending { @include label; position: absolute; left: var(--space-4); bottom: var(--space-4); }

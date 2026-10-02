@@ -134,6 +134,14 @@
   line-height: 0.78;
 }
 
+// Minimal darkening for large numbers that otherwise fall below 3:1 on the light page.
+:global(html[data-theme="light"]) .number {
+  &[data-artifact-id="001"],
+  &[data-artifact-id="003"] { color: #ec5a36; }
+  &[data-artifact-id="004"] { color: #ec5a35; }
+  &[data-artifact-id="006"] { color: #eb5b35; }
+}
+
 .details {
   margin-top: auto;
 }

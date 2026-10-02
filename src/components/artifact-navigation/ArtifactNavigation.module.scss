@@ -8,7 +8,7 @@
 
   a { display: flex; flex-direction: column; gap: 0.35rem; padding: var(--space-4); }
   a:last-child { align-items: flex-end; text-align: right; }
-  a:hover strong { color: var(--color-accent); }
+  a:hover strong { color: var(--color-accent-text); }
   a > span { @include label; opacity: 0.65; }
   strong { font-size: var(--text-sm); font-weight: 500; transition: color var(--duration-fast) ease; }
 }

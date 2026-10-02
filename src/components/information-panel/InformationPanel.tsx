@@ -36,7 +36,8 @@ export function InformationPanel({
    * After this, the portal stays mounted permanently.
    */
   useEffect(() => {
-    setMounted(true);
+    const frame = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   /*
@@ -65,10 +66,14 @@ export function InformationPanel({
     document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
 
-    const focusFrame = requestAnimationFrame(() => {
-      panelRef.current
-        ?.querySelector<HTMLButtonElement>("button")
-        ?.focus({ preventScroll: true });
+    // Wait for the overlay visibility update to paint before moving focus.
+    let focusFrame: number;
+    const visibilityFrame = requestAnimationFrame(() => {
+      focusFrame = requestAnimationFrame(() => {
+        panelRef.current
+          ?.querySelector<HTMLButtonElement>("button")
+          ?.focus({ preventScroll: true });
+      });
     });
 
     const onKeyDown = (keyboardEvent: KeyboardEvent) => {
@@ -113,6 +118,7 @@ export function InformationPanel({
     window.addEventListener("keydown", onKeyDown);
 
     return () => {
+      cancelAnimationFrame(visibilityFrame);
       cancelAnimationFrame(focusFrame);
 
       document.documentElement.style.overflow =
@@ -201,7 +207,7 @@ export function InformationPanel({
               </div>
 
               <div className={styles.panelBody}>
-                <p className={styles.number}>
+                <p className={styles.number} data-artifact-id={artifact.id}>
                   {artifact.id}
                 </p>
 

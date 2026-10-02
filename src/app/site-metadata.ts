@@ -1,4 +1,4 @@
-export const siteUrl = "https://balogunoluwasogo-artifacts.vercel.app";
+export const siteUrl = "https://artifacts.balogunoluwasogo.com";
 
 export const siteTitle = "Artifacts — Interaction Archive";
 
